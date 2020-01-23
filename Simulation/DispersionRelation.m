@@ -214,7 +214,7 @@ function [model, refr] = DispersionRelation(model, varargin)
     model.component('comp1').func('int1').setIndex('funcs', 1, 0, 1);
     model.component('comp1').func('int1').setIndex('funcs', 2, 1, 1);
     model.component('comp1').func('int1').set('scaledata', 'auto');
-    model.component('comp1').func('int1').set('filename', 'C:/Users/kkeller/Documents/PhD/04 Projects/SinglePhotonGeneration/03 Simulation/01 Comsol/200123_NLOOpt/DataIn/eps_HD_BB_OH.txt');
+    model.component('comp1').func('int1').set('filename', [pwd 'DataIn\eps_HD_BB_OH.txt']);
     model.component('comp1').func('int1').set('extrap', 'linear');
     model.component('comp1').func('int1').set('argunit', 'nm');
     if args.('calcRefr')

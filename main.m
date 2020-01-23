@@ -1,13 +1,17 @@
 N = 25;
-wWGA = 400; 
+wWGA = 500;
 hWGA = [220, 340];
+hOrganicA = linspace(50, 300, 6)
 material = 'Si';            %Si or SiNx
-QSStates = cell(length(wWGA), 1); 
-for ii = 1:length(wWGA)
-    for kk = 1:length(hWGA)
-        wWG = wWGA(ii);
-        hWG = hWGA(kk); 
-        DumpingName = [num2str(wWG) 'nm_' num2str(hWG) 'nm_'];
+
+nu = cell(length(hWGA), length(hOrganicA));
+losses = cell(length(hWGA), length(hOrganicA));
+
+for ii = 1:length(hWGA)
+    for kk = 1:length(hOrganicA)
+        hOrganic = hOrganicA(kk);
+        hWG = hWGA(ii);
+        DumpingName = [num2str(hOrganic) 'nm_' num2str(hWG) 'nm_'];
         % Simulate
         Simulation = Setup('Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hBuffer', {0, '[nm]'});
         [Simulation, refr] = DispersionRelation(Simulation, 'plot', false); 
@@ -23,7 +27,7 @@ for ii = 1:length(wWGA)
 
         % Save & Evaluate
         mphsave(Simulation, ['./ComsolModels/' DumpingName '_Model.mph']);
-        [Results] = Evaluation(Simulation, 'Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'});
+        [Results] = Evaluation(Simulation, 'Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
         save(['./ComsolModels/' DumpingName '_Results.mat'], 'Results');
         dumpStruct(Results, ['./Data/200109_' DumpingName '_ResultsDump.csv']);
         try
@@ -32,8 +36,11 @@ for ii = 1:length(wWGA)
            disp(['Error at Plotting' DumpingName])
            continue
         end
-        mainTest(Simulation, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'});
-        disp(['Done with Quantum Evaluation ' num2str(ii/length(wWGA)*100) '%'])
+
+        nu{ii, kk} = QuantumEvaluation(Simulation, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
+        losses{ii, kk} = AssignResults(Results, hWG, hOrganic);
     end
 end
-save(['./ComsolModels/' DumpingName '_QS.mat'], 'QSStates');
+
+PlotLosses(losses)
+PlotEfficiciency(hWGA,OrganicA, nu)
