@@ -1,0 +1,9 @@
+*.iml
+Masks/*
+.idea/*
+Templates/*
+Figures/*
+Data/*
+ComsolModels/*
+*.mph
+*.lock
