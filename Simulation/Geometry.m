@@ -12,7 +12,8 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
         'Au', [], ...
         'Si', [], ...
         'Organics', [],...
-        'Al2O3', []);
+        'Al2O3', [], ...
+        'Air', []);
 
     options = struct(...
         'wSim', {2.5, '[um]'},...
@@ -22,6 +23,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
         'hOrganic', {200, '[nm]'},...
         'hBuffer', {200, '[nm]'},...
         'hContact', {50, '[nm]'},...
+        'hAir', {500, '[nm]'},...s
         'r33', {137, '[pm/V]'}, ...
         'lmin', {1100, '[nm]'}, ...
         'lmax', {2300, '[nm]'}, ...
@@ -102,6 +104,13 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hOrganic+hBuffer'});
     counter = counter + 1;
 
+    % Air
+    model.component('comp1').geom('geom1').create(['r' num2str(counter)], 'Rectangle');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('Air Cladding');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hAir'});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hOrganic+hBuffer+hContact'});
+    counter = counter + 1;
+
     model.component('comp1').geom('geom1').run;
 
 
@@ -137,8 +146,15 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
         Selections.('Au') = [old, new];
     end
 
-    all = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; -eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')+eps], 'boundary');
-    inner = mphselectbox(model, 'geom1', [+eps options(1).('wSim')-eps;eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')-eps], 'boundary');
+    if isempty(Selections.('Air'))
+        Selections.('Air') = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')-eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')+options(1).('hAir')+eps], 'domain');
+    else
+        old = Selections.('Air');
+        new = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')-eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')+options(1).('hAir')+eps], 'domain');
+        Selections.('Air') = [old, new];
+    end
+    all = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; -eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')+options(1).('hAir')+eps], 'boundary');
+    inner = mphselectbox(model, 'geom1', [+eps options(1).('wSim')-eps;eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')+options(1).('hAir')-eps], 'boundary');
     BoundarySelection = setdiff(all, inner);
     Graphene = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')-eps options(1).('hSubstrate')+eps], 'boundary');
     TopContact = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')-eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+eps], 'boundary');
