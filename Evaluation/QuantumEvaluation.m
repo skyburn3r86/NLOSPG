@@ -91,7 +91,7 @@ function [nu]=QuantumEvaluation(model, varargin)
     cmap = autumn(N);
     cmap = cmap(end:-1:1, :);
     maxval = 0;
-    nu = zeros(N, 1)
+    nu = zeros(N, 1);
     figure()
     hold on;
     for ii = 1:N
@@ -102,7 +102,7 @@ function [nu]=QuantumEvaluation(model, varargin)
         if max(abs(Wtemp)) > maxval
            maxval = max(abs(Wtemp));
         end
-        nu(ii) = max(abs(Wtemp))/(l*Ppump)
+        nu(ii) = max(abs(Wtemp))/(l*Ppump);
     end
     % make round number out of maxval
     ex = 10^floor(log10(maxval));

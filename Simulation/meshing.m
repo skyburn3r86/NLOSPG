@@ -54,7 +54,7 @@ function [model] = meshing(model, Selection, varargin)
        end
     end
     selectionNames = fieldnames(Selection);
-    selectionNames = selectionNames([find(strcmp(selectionNames, 'Au')), find(strcmp(selectionNames, 'Si')),find(strcmp(selectionNames, 'SiNx')), find(strcmp(selectionNames, 'Al2O3')), find(strcmp(selectionNames, 'Organics')), find(strcmp(selectionNames, 'SiO2'))]);
+    selectionNames = selectionNames([find(strcmp(selectionNames, 'Au')), find(strcmp(selectionNames, 'Si')),find(strcmp(selectionNames, 'SiNx')), find(strcmp(selectionNames, 'Al2O3')), find(strcmp(selectionNames, 'Organics')), find(strcmp(selectionNames, 'SiO2')), find(strcmp(selectionNames, 'Air'))]);
     counter = 1;
     model.component('comp1').mesh.create('mesh1');
     for ii = 1:length(selectionNames)
