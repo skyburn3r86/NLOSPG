@@ -138,7 +138,10 @@ function [outerResults] = Evaluation(model, varargin)
             xlabel('x index')
             ylabel('y index')
             title([num2str(options(1).('wl')) 'nm: E for ' num2str(real(neff(ii))) ' + ' num2str(imag(neff(ii))) +'i'])
-            saveas(gcf, ['./Figures/FieldProfiles/' num2str(options(1).('wWG')*1e9) 'nm_' num2str(options(1).('hWG')*1e9) 'nm_' num2str(options(1).('wl')*1e9) 'nm_' num2str(real(neff(ii)), 4) '-i' num2str(abs(imag(neff(ii))), 4) '_Enorm.png'])
+            saveas(gcf, ['./Figures/FieldProfiles/' num2str(options(1).('wWG')*1e9) 'nm_' num2str(options(1).('hWG')*1e9) 'nm_' num2str(options(1).('hOrganic')*1e9) 'nm_' num2str(options(1).('wl')*1e9) 'nm_' num2str(real(neff(ii)), 4) '-i' num2str(abs(imag(neff(ii))), 4) '_Enorm.png'])
+            indices = [indices sI(ii)];
+            nProp = [nProp neff(ii)];
+        
         end
 
         % Get Fields for Polarization Determination
