@@ -1,7 +1,7 @@
 N = 25;
 wWGA = 500;
-hWGA = [220, 260, 340, 400, 500];
-hOrganicA = linspace(100, 300, 6); 
+hWGA = [220, 340, 400];
+hOrganicA = linspace(50, 300, 6); 
 material = 'Si';            %Si or SiNx
 
 nu = cell(length(hWGA), length(hOrganicA));
@@ -11,7 +11,7 @@ for ii = 1:length(hWGA)
     for kk = 1:length(hOrganicA)
         hOrganic = hOrganicA(kk);
         hWG = hWGA(ii);
-        DumpingName = [num2str(hOrganic) 'nm_' num2str(hOrganic) 'nm_'];
+        DumpingName = [num2str(hOrganic) 'nm_' num2str(hWG) 'nm_'];
         % Simulate
         Simulation = Setup('Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hBuffer', {0, '[nm]'});
         [Simulation, refr] = DispersionRelation(Simulation, 'plot', false); 
@@ -29,7 +29,7 @@ for ii = 1:length(hWGA)
         mphsave(Simulation, ['./ComsolModels/' DumpingName '_Model.mph']);
         [Results] = Evaluation(Simulation, 'Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
         save(['./ComsolModels/' DumpingName '_Results.mat'], 'Results');
-        %dumpStruct(Results, ['./Data/200109_' DumpingName '_ResultsDump.csv']);
+        dumpStruct(Results, ['./Data/200109_' DumpingName '_ResultsDump.csv']);
         try
             PlotDispersionRelation(Results, 'fileName', DumpingName);
         catch
