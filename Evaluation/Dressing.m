@@ -170,6 +170,7 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
                 if length(yi) > 1
                     yi = yi(1);
                 end
+
                 pk = findpeaks(Z(0.9*length(Z), :));
                 pk2 = findpeaks(Z(yi, xi));
                 if ~((ratio > r && length(pk2) == 1) || (length(pk) == 1 && length(pk2) == 1))
