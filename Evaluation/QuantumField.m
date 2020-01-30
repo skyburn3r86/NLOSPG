@@ -11,6 +11,8 @@ classdef QuantumField
         eps0 = 8.854e-12;
         mu0 = 4*pi*1e-7;
         c_const = 1/(eps0*mu0)
+        x = [];
+        y = [];
         ux = [];
         uy = [];
         uz = [];
@@ -20,7 +22,8 @@ classdef QuantumField
         neff = 0;
         chi1i = 0;
         chi2r = [];
-        wl = [];
+        wl = 0;
+        omega = 0
         psi = [];
         ad = [];
         a = [];
@@ -41,6 +44,7 @@ classdef QuantumField
             obj.chi1i = 0.5*imag(sqrt(neff))/sqrt(obj.neff)
             obj.chi2r = chi2r;
             obj.wl = wl;
+            obj.omega = 2*pi*c_const/obj.wl;
         end
 
         function [obj] = initializeState(obj)
@@ -49,6 +53,18 @@ classdef QuantumField
 
             psi = zeros(obj.NPhotons + 1, 1);
             psi(1) = 1;
+        end
+
+        function obj = normalizeField(obj, Pin)
+            dx = obj.x(2)-obj.x(1);
+            dy = obj.y(2)-obj.y(1);
+            A = sqrt(sum(sum(obj.ux*conj(obj.ux) + obj.uy*conj(obj.uy) + obj.uz*conj(obj.uz)))*dx*dy);
+            obj.ux = 1/A*obj.ux;
+            obj.uy = 1/A*obj.uy;
+            obj.uz = 1/A*obj.uz;
+            obj.vx = 1/A*obj.vx;
+            obj.vy = 1/A*obj.vy;
+            obj.vz = 1/A*obj.vz;
         end
 
     end
