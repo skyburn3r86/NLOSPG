@@ -13,7 +13,7 @@ for ii = 1:length(hWGA)
         hWG = hWGA(ii);
         DumpingName = [num2str(hOrganic) 'nm_' num2str(hWG) 'nm_'];
         % Simulate
-        Simulation = Setup('Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
+        Simulation2q = Setup('Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
         [Simulation, refr] = DispersionRelation(Simulation, 'plot', false); 
         [Simulation, Selections, BoundarySel] = Geometry(Simulation, 'mat', {0, material}, 'Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hBuffer', {0, '[nm]'});
         [Simulation] = Materials(Simulation, Selections); 
