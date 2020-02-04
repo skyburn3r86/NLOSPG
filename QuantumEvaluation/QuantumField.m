@@ -44,7 +44,7 @@ classdef QuantumField
             obj.vy = vy;
             obj.vz = vz;
             obj.neff = real(neff);
-            obj.chi1i = 0.5*imag(sqrt(neff))/sqrt(obj.neff);
+            obj.chi1i = 2*imag(neff)*(obj.neff);
             obj.chi2r = chi2r;
             obj.wl = wl;
             obj.omega = 2*pi*obj.c_const/obj.wl;
@@ -64,17 +64,19 @@ classdef QuantumField
             obj.ad = sparse(obj.ad); 
             obj.psi = sparse(obj.psi); 
         end
-
-        function obj = normalizeField(obj)
+        function [obj] = setLosses(obj, chi1i)
+           obj.chi1i = chi1i;
+        end
+        function obj = normalizeField(obj, L)
             dx = obj.x(2)-obj.x(1);
             dy = obj.y(2)-obj.y(1);
             A = sqrt(sum(sum(obj.ux*conj(obj.ux) + obj.uy*conj(obj.uy) + obj.uz*conj(obj.uz)))*dx*dy);
-            obj.ux = 1/A*obj.ux;
-            obj.uy = 1/A*obj.uy;
-            obj.uz = 1/A*obj.uz;
-            obj.vx = 1/A*obj.vx;
-            obj.vy = 1/A*obj.vy;
-            obj.vz = 1/A*obj.vz;
+            obj.ux = 1/sqrt(L)*1/A*obj.ux;
+            obj.uy = 1/sqrt(L)*1/A*obj.uy;
+            obj.uz = 1/sqrt(L)*1/A*obj.uz;
+            obj.vx = 1/sqrt(L)*1/A*obj.vx;
+            obj.vy = 1/sqrt(L)*1/A*obj.vy;
+            obj.vz = 1/sqrt(L)*1/A*obj.vz;
         end
 
     end

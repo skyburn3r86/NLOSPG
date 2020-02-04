@@ -3,10 +3,10 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
-%DRESSING Summary of this function goes here
-%   Detailed explanation goes here
-    % Parse Inputs
+function [Ep, Es, Ei] = test_ExtractField(model, varargin)
+% Summary Here
+%   Detailed Summary Here
+    
     warning('off','all');
     hbar = 1.0545718e-34;
     eps0 = 8.854e-12;
@@ -16,10 +16,10 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
     options = struct(...
         'wSim', {2.5, '[um]'},...
         'hSubstrate', {2, '[um]'},...
-        'hWG', {340, '[nm]'},...
+        'hWG', {220, '[nm]'},...
         'wWG', {500, '[nm]'},...
         'hOrganic', {200, '[nm]'},...
-        'hBuffer', {200, '[nm]'},...
+        'hBuffer', {0, '[nm]'},...
         'hContact', {50, '[nm]'},...
         'r33', {137, '[pm/V]'}, ...
         'lmin', {1100, '[nm]'}, ...
@@ -74,6 +74,8 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
     Es = cell(length(n), 1);
     Ei = cell(length(n), 1);
     Ep = cell(length(n), 1);
+    
+    
     % Extract fields as function of energy conservating modes
     for ii = 1:n
         for kk = 1:m
@@ -96,14 +98,29 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
             Ez = temp.('d1');
             cordsz = temp.('p');
 
+            temp = mpheval(model, 'ewfd.Hx', 'dataset', 'dset3', 'outersolnum', iter);
+            Hx = temp.('d1');
+            cordsvx = temp.('p');
+
+            temp = mpheval(model, 'ewfd.Hy', 'dataset', 'dset3', 'outersolnum', iter);
+            Hy = temp.('d1');
+            cordsvy = temp.('p');
+
+            temp = mpheval(model, 'ewfd.Hz', 'dataset', 'dset3', 'outersolnum', iter);
+            Hz = temp.('d1');
+            cordsvz = temp.('p');
+
             temp = mpheval(model, 'ewfd.nxx', 'dataset', 'dset3', 'outersolnum', iter);
             nRefr = temp.('d1');
             nRefr = nRefr(sI, :);
 
             Ex = Ex(sI, :);
             Ey = Ey(sI, :);
-            Ez = Ey(sI, :);
-
+            Ez = Ez(sI, :);
+            Hx = Hx(sI, :);
+            Hy = Hy(sI, :);
+            Hz = Hz(sI, :); 
+            
             x = cordsx(1, :);
             y = cordsx(2, :);
 
@@ -120,21 +137,39 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
 
                 x = cordsx(1, :);
                 y = cordsx(2, :);
-                Zx=griddata(x,y,Ex(zz, :),X,Y);
-                II = isnan(Zx);
-                Zx(II) = 0;
+                ux=griddata(x,y,Ex(zz, :),X,Y);
+                II = isnan(ux);
+                ux(II) = 0;
 
                 x = cordsy(1, :);
                 y = cordsy(2, :);
-                Zy=griddata(x,y,Ey(zz, :),X,Y);
-                II = isnan(Zy);
-                Zy(II) = 0;
+                uy=griddata(x,y,Ey(zz, :),X,Y);
+                II = isnan(uy);
+                uy(II) = 0;
 
-                x = cordsy(1, :);
-                y = cordsy(2, :);
-                Zz=griddata(x,y,Ez(zz, :),X,Y);
-                II = isnan(Zz);
-                Zz(II) = 0;
+                x = cordsz(1, :);
+                y = cordsz(2, :);
+                uz=griddata(x,y,Ez(zz, :),X,Y);
+                II = isnan(uz);
+                uz(II) = 0;
+
+                x = cordsvx(1, :);
+                y = cordsvx(2, :);
+                vx=griddata(x,y,Hx(zz, :),X,Y);
+                II = isnan(vx);
+                vx(II) = 0;
+
+                x = cordsvy(1, :);
+                y = cordsvy(2, :);
+                vy=griddata(x,y,Hy(zz, :),X,Y);
+                II = isnan(vy);
+                vy(II) = 0;
+
+                x = cordsvz(1, :);
+                y = cordsvz(2, :);
+                vz=griddata(x,y,Hz(zz, :),X,Y);
+                II = isnan(vz);
+                vz(II) = 0;
 
                 Zn = griddata(x, y, nRefr(ii, :), X, Y);
                 II = isnan(Zn);
@@ -142,7 +177,7 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
                 dx = X(1, 2) - X(1, 1);
                 dy = Y(2, 1) - Y(1, 1);
 
-                Z = abs(sqrt(Zx.*conj(Zx) + Zy.*conj(Zy) + Zz.*conj(Zz)));
+                Z = abs(sqrt(ux.*conj(ux) + uy.*conj(uy) + uz.*conj(uz)));
                 mt = sum(sum(Z*dx*dy));
                 mx = sum(sum(Z.*X*dx*dy));
                 my = sum(sum(Z.*Y*dx*dy));
@@ -153,6 +188,7 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
                     (yc > (options(1).('hSubstrate') - options(1).('hWG'))) && (yc < (options(1).('hSubstrate') + options(1).('hOrganic'))))
                     continue;
                 end
+
                 % Calculate Center of Energy
                 % Select array elements to be evaluated
                 I = (X > (options(1).('wSim') - options(1).('wWG'))/2) & (X < (options(1).('wSim') + options(1).('wWG'))/2) & ...
@@ -160,6 +196,7 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
                 Ptot = abs(sum(sum(sqrt(Zn).*Z.^2)));
                 Pinner = abs(sum(sum(sqrt(Zn(I)).*Z(I).^2)));
                 ratio = Pinner/Ptot;
+
                 % Select Modes
                 n1 = max(real(Zn(I)));
                 n2 = 1.454;
@@ -176,18 +213,35 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
                 if ~((ratio > r && length(pk2) == 1) || (length(pk) == 1 && length(pk2) == 1))
                     continue
                 end
+
                 % Find Polarization
-                yy = sum(sum(abs(Zy).^2));
-                yx = sum(sum(abs(Zx).^2));
+                yy = sum(sum(abs(uy).^2));
+                yx = sum(sum(abs(ux).^2));
                 yt = yx + yy;
                 TE = yx/yt;
                 TM = yy/yt;
+                
+                ymin = options.('hSubstrate');
+                ymax = ymin + options(1).('hOrganic');
+                
+                x = x_edge(1,:); 
+                y = y_edge(1,:);
+                chi2 = 1e-9;
+                chi2_333 = zeros(length(x), length(y));
+                for oo = 1:length(x)
+                    for ll = 1:length(y)
+                        if (x(oo) > 0 && x(oo) < 2.5e-6) && (y(ll) > ymin && y(ll) < ymax)
+                            chi2_333(oo, ll) = 1;
+                        end
+                    end
+                end
+                chi = chi2_333*chi2;
                 if TE > TM
                     disp('TE Mode. Ignoring')
                 else
                     % Add fields into struct.
-                    field = Field(Zx, Zy, Zz, 2*pi*c_const/wl(iter), neff(zz));
-                    field = field.normalizeFields(x_edge, y_edge);
+                    disp('TM Mode. Accepting')
+                    field = QuantumField(x_edge(1,:), y_edge(1,:), ux, uy, uz, vx, vy, vz, neff(zz), chi, wl(iter));
                     if kk == 1
                         Es{ii} = field;
                     elseif kk == 2
@@ -204,4 +258,3 @@ function [x, y, Es, Ei, Ep] = Dressing(model, varargin)
     y = y_edge;
     warning('on','all');
 end
-
