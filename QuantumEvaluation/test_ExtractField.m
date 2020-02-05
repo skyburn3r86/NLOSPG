@@ -241,7 +241,12 @@ function [Ep, Es, Ei] = test_ExtractField(model, varargin)
                 else
                     % Add fields into struct.
                     disp('TM Mode. Accepting')
-                    field = QuantumField(x_edge(1,:), y_edge(1,:), ux, uy, uz, vx, vy, vz, neff(zz), chi, wl(iter));
+                    if kk ~= 3
+                        field = QuantumField(x_edge(1,:), y_edge(1,:), ux, uy, uz, vx, vy, vz, neff(zz), chi, wl(iter));
+                    else
+                        field = ClassicalField(x_edge(1,:), y_edge(1,:), ux, uy, uz, vx, vy, vz, neff(zz), chi, wl(iter));
+                    end
+
                     if kk == 1
                         Es{ii} = field;
                     elseif kk == 2

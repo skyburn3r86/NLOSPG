@@ -8,7 +8,7 @@ model = mphload('C:\Users\kkeller\Documents\PhD\04 Projects\SinglePhotonGenerati
 
 % Initialize the propagation distance and vector
 zmin = 0;   
-zmax = 50e-6; 
+zmax = 200e-6; 
 dz = 100e-9;
 zz= linspace(0, zmax, (zmax-zmin)/dz - 1); 
 
@@ -25,27 +25,45 @@ Es = Es.normalizeField(zmax);
 Ei = Ei.normalizeField(zmax); 
 
 % Initialize Quantum States
-Ep.NPhotons = 100; 
 Es.NPhotons = 10; 
 Ei.NPhotons = 10; 
 Es = Es.initializeState(1); 
 Ei = Ei.initializeState(1); 
-Ep = Ep.initializeState(Ep.NPhotons + 1); 
 
-%%
+% Initialize Pump beam
+tau = 1e-6;                 % Measure during 1 microsecond
+Pin = 1;                    % 1 W input Power
+Ep = Ep.setTime(tau);       % Set duration of measurement
+Ep = Ep.setPower(Pin);      % Set Input power
+
+%% 
+lossStr = 'Lossless';
+if strcmp(lossStr, 'Lossless')
+    chi1is = 0; 
+    chi1ii = 0;
+elseif strcmp(lossStr, 'Lossy')
+    chi1is = -0.0172; 
+    chi1ii = -0.0220;
+else
+    chi1is = Es.chi1i; 
+    chi1ii = Ei.chi1i;
+end
+Es.chi1i = chi1is;
+Ei.chi1i = chi1ii; 
+%% Simulate
+[P, Estemp, Eitemp, Eptemp] =  QuantumCalc(Es, Ep, Ei, zz);
+disp('Done with Simulation')
+
+%% Plot
 close all;
-
 record = true;
-
 if record
     writerObj = VideoWriter('Videos/Generated_withoutLoss.avi');
-    writerObj.FrameRate = 15;
+    writerObj.FrameRate = 30;
     open(writerObj);
     myfig = figure(1);
     hold on; 
 end
-[P, Estemp, Eitemp, Eptemp] =  QuantumCalc(Es, Ep, Ei, zz);
-disp('Done')
 for ii = 1:length(zz)
     if record
         plot(linspace(0, Estemp{ii}.NPhotons, Estemp{ii}.NPhotons + 1), conj(Estemp{ii}.psi).*Estemp{ii}.psi)
@@ -56,7 +74,6 @@ for ii = 1:length(zz)
         ylabel('Probability')
         drawnow
         myframe = getframe(gca);
-%         size(myframe.cdata); 
         writeVideo(writerObj, myframe);
         clf(myfig);
     end
@@ -72,13 +89,15 @@ figure(1)
 semilogy(zz, real(P)/max(P))
 ylim([1e-2, 1.1])
 
-disp('Done')
+disp('Done Plotting')
 
-% fileID = fopen(['Data/exp_' num2str(N(kk)) '.txt'], 'w');
-% for ii = 1:length(z)
-%     x = z(ii);
-%     y = P(ii)/max(P);
-%     fprintf(fileID, '%.7f\t%.14f\n', x, y);
-% end
-% fclose(fileID);
+%%
+
+fileID = fopen(['Data/exp.txt'], 'w');
+for ii = 1:length(zz)
+    x = zz(ii);
+    y = P(ii)/max(P);
+    fprintf(fileID, '%.7f\t%.14f\n', x, y);
+end
+fclose(fileID);
 

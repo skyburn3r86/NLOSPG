@@ -5,7 +5,6 @@
     
 function [Es, Ei, Ep] = Propagate(Es, Ei, Ep, z)
     % Specification of the Type of Phase Matching
-    debug = true; 
     phase = "Perfect";
     
     Estemp = cell(length(z), 1); 
@@ -39,13 +38,14 @@ function [Es, Ei, Ep] = Propagate(Es, Ei, Ep, z)
         dz = 0;
     end
     % Loss rate [1/m]
-    gLp = real(Ep.neff)^2/(c_const)*Ep.chi1i*Ep.omega;                     % Right solution would be: Epsr*c_const/n_G
+    gLp = Ep.chi1i/real(Ep.neff)*Ep.omega/c_const;                     % Right solution would be: Epsr*c_const/n_G
     gLi = real(Ei.neff)^2/(c_const)*Ei.chi1i*Ei.omega;
     gLs = real(Es.neff)^2/(c_const)*Es.chi1i*Es.omega;
 
     g0 = overlap(Es, Ep, Ei);
-    N = 1e24;
+
     for ii = 2:length(z)
+        N = Eptemp{ii-1}.N;
         % Non-Linear Process
         if strcmp(phase, "QuasiPhase")          % Periodically switch poling direction
             if mod(z(ii), T) <= lc
@@ -70,8 +70,7 @@ function [Es, Ei, Ep] = Propagate(Es, Ei, Ep, z)
 
         % Losses
         % Losses Pump
-        Eptemp{ii}.psi = expA(dz*gLp*Ep.a)*Eptemp{ii-1}.psi;              % Propagation
-        Eptemp{ii}.psi = 1/sqrt(Eptemp{ii}.psi'*Eptemp{ii}.psi)*Eptemp{ii}.psi;         % Normalization
+        Eptemp{ii} = Eptemp{ii}.setPower(Eptemp{ii-1}.Pin*exp(gLp*dz));              % Propagation
 
         % Losses Signal
         Estemp{ii}.psi = expA(dz*gLs*Es.a)*Estemp{ii}.psi;                            % Propagation
@@ -87,15 +86,6 @@ function [Es, Ei, Ep] = Propagate(Es, Ei, Ep, z)
     Ei = Eitemp; 
 end
 
-function g0 = overlap(Es, Ep, Ei)
-    x = Es.x;
-    y = Ei.y;
-    chi = Es.chi2r;
-    int = chi*conj(Es.uy)*conj(Ei.uy)*Ep.uy;
-    A = Es.hbar*sqrt(Es.omega*Ei.omega)/(2*Es.eps0*real(Es.neff)*real(Ei.neff))*sqrt(Ep.hbar*Ep.omega/(2*real(Ep.neff)^2*Ep.eps0));       % Missing Factor 1/sqrt(L) due to field normalization
-    overlap = trapz(y, trapz(x, int, 2));
-    g0 = A*overlap;
-end
 
 function s = expA(x)
     s = zeros(size(x)); 
