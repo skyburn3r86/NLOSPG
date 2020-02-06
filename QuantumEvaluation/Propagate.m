@@ -38,8 +38,8 @@ function [Es, Ei, Ep] = Propagate(Es, Ei, Ep, z)
         dz = 0;
     end
     % Loss rate [1/m]
-    gLp = Ep.chi1i/real(Ep.neff)*Ep.omega/c_const;                     % Right solution would be: Epsr*c_const/n_G
-    gLi = real(Ei.neff)^2/(c_const)*Ei.chi1i*Ei.omega;
+    gLp = Ep.chi1i/real(Ep.neff)*Ep.omega/c_const;
+    gLi = real(Ei.neff)^2/(c_const)*Ei.chi1i*Ei.omega;      % Needs to be revised imo
     gLs = real(Es.neff)^2/(c_const)*Es.chi1i*Es.omega;
 
     g0 = overlap(Es, Ep, Ei);
