@@ -5,7 +5,7 @@
     
 function [Es, Ei, Ep] = Propagate(Es, Ei, Ep, z)
     % Specification of the Type of Phase Matching
-    phase = "Perfect";
+    phase = "QuasiPhase";
     
     Estemp = cell(length(z), 1); 
     Eitemp = cell(length(z), 1); 
@@ -49,16 +49,16 @@ function [Es, Ei, Ep] = Propagate(Es, Ei, Ep, z)
         % Non-Linear Process
         if strcmp(phase, "QuasiPhase")          % Periodically switch poling direction
             if mod(z(ii), T) <= lc
-                Estemp{ii}.psi = Estemp{ii-1}.psi + g0*exp(1i*dk*dz)*dz*Es.ad*Estemp{ii-1}.psi*sqrt(N);
-                Eitemp{ii}.psi = Eitemp{ii-1}.psi + g0*exp(1i*dk*dz)*dz*Ei.ad*Eitemp{ii-1}.psi*sqrt(N);
+                Estemp{ii}.psi = Estemp{ii-1}.psi + g0*exp(1i*dk*z(ii))*dz/c_const*Es.ad*Estemp{ii-1}.psi*sqrt(N);
+                Eitemp{ii}.psi = Eitemp{ii-1}.psi + g0*exp(1i*dk*z(ii))*dz/c_const*Ei.ad*Eitemp{ii-1}.psi*sqrt(N);
             else
-                Estemp{ii}.psi = Estemp{ii-1}.psi - g0*exp(1i*dk*dz)*dz*Es.ad*Estemp{ii-1}.psi*sqrt(N);
-                Eitemp{ii}.psi = Eitemp{ii-1}.psi - g0*exp(1i*dk*dz)*dz*Ei.ad*Eitemp{ii-1}.psi*sqrt(N);
+                Estemp{ii}.psi = Estemp{ii-1}.psi - g0*exp(1i*dk*z(ii))*dz/c_const*Es.ad*Estemp{ii-1}.psi*sqrt(N);
+                Eitemp{ii}.psi = Eitemp{ii-1}.psi - g0*exp(1i*dk*z(ii))*dz/c_const*Ei.ad*Eitemp{ii-1}.psi*sqrt(N);
             end
 
         elseif strcmp(phase, "Perfect")         % No Phase Mismatch
-            Estemp{ii}.psi = Estemp{ii-1}.psi + g0*dz*Es.ad*Estemp{ii-1}.psi*sqrt(N);
-            Eitemp{ii}.psi = Eitemp{ii-1}.psi + g0*dz*Ei.ad*Eitemp{ii-1}.psi*sqrt(N);
+            Estemp{ii}.psi = Estemp{ii-1}.psi + g0*dz/c_const*Es.ad*Estemp{ii-1}.psi*sqrt(N);
+            Eitemp{ii}.psi = Eitemp{ii-1}.psi + g0*dz/c_const*Ei.ad*Eitemp{ii-1}.psi*sqrt(N);
 
         elseif strcmp(phase, "None")            % Phase Mismatch non-compensated
             Estemp{ii}.psi = Estemp{ii-1}.psi + g0*exp(1i*dk*dz)*dz/c_const*Es.ad*Estemp{ii-1}.psi*sqrt(N);

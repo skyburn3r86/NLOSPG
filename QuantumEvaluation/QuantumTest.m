@@ -31,8 +31,8 @@ Es = Es.initializeState(1);
 Ei = Ei.initializeState(1); 
 
 % Initialize Pump beam
-tau = 1e-6;                 % Measure during 1 microsecond
-Pin = 1;                    % 1 W input Power
+tau = dz/Ep.c_const;      % Measure during 1 microsecond
+Pin = 1e-6;                 % 1 W input Power
 Ep = Ep.setTime(tau);       % Set duration of measurement
 Ep = Ep.setPower(Pin);      % Set Input power
 
@@ -56,6 +56,7 @@ disp('Done with Simulation')
 
 %% Plot
 close all;
+clc; 
 record = true;
 if record
     writerObj = VideoWriter('Videos/Generated_withoutLoss.avi');
@@ -69,7 +70,16 @@ for ii = 1:length(zz)
         plot(linspace(0, Estemp{ii}.NPhotons, Estemp{ii}.NPhotons + 1), conj(Estemp{ii}.psi).*Estemp{ii}.psi)
         tex = sprintf('z=%.1f', zz(ii)*1e6);
         text(0.8*Es.NPhotons, 0.9, tex) 
+        p1 = full(conj(Estemp{ii}.psi(2)).*Estemp{ii}.psi(2));
         ylim([0, 1]);
+        arrowx = 1;
+        arrowy = p1; 
+        textx = 5; 
+        texty = 0.5;
+        xa = [textx arrowx];
+        ya = [texty arrowy];
+        [xaf, yaf] = ds2nfu(xa, ya);
+        annotation('textarrow', xaf, yaf, 'String', sprintf('P(1) = %.3f', p1)); 
         xlabel('Photon Number')
         ylabel('Probability')
         drawnow
@@ -83,7 +93,7 @@ if record
     hold off;
     close(writerObj);
 end
-
+%%
 % Plot the power
 figure(1)
 semilogy(zz, real(P)/max(P))
