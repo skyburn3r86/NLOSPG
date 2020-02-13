@@ -3,41 +3,53 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function [model] = Geometry(model, varargin)
+function [model, Selections, BoundarySelection] = Geometry(model, varargin)
 %GEOMETRY Generates Geometry of Initialized Parameters (Setup)
     % Get Arguments
     % Selections are containers for geometry entities of certain material
+    Selections = struct(...
+        'substrate', [], ...
+        'Cladding', [], ...
+        'WG_Electrodes', [], ...
+        'WG_passive', [], ...
+        'WG_OEO', [],...
+        'Air', []);
     
-    materials = varargin{1}
-    materialNames=fieldnames(materials);
+    
+    options = struct(...   
+        'substrate', [],...
+        'metal_1', [],...
+        'metal_II', [],...
+        'photonicWG', [],...
+        'OEO', [],...     
+        'air', []);
+    selectionNames=fieldnames(Selections);
     % ***************** Create Geometry
     model.component('comp1').geom.create('geom1', 2);
     
     % generting the selction containers for tracking materials of geometry
     % 1st entry lowest priority; last highest priority overriding lower
     % layers
-    for jj = 1:length(materialNames)
-        selection_container_dummy = model.component('comp1').geom('geom1').selection.create(materialNames{jj}, 'CumulativeSelection');
-        selection_container_dummy.label(materialNames(jj));        
+    for jj = 1:length(selectionNames)
+        selection_container_dummy = model.component('comp1').geom('geom1').selection.create(['sel' selectionNames{jj}], 'CumulativeSelection');
+        selection_container_dummy.label(selectionNames(jj));        
     end
 
-    % Generating Objects: 
-    
     % Generating substrate
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'ThermalOxide'], 'Rectangle');
     geom_dummy.label('Thermal Oxide');
-	geom_dummy.set('base','center'); % base = center -> pos = center; base = corner -> pos = left bot corner of objects
-    geom_dummy.set('pos', {'0' '-hSubstrate/2'}); % first position x, second position y
+	geom_dummy.set('base','center'); % base = center -> pos = center; base = corner -> pos = left bot corner
+    geom_dummy.set('pos', {'0' '-hSubstrate/2'});
     geom_dummy.set('size', {'wSim' 'hSubstrate'});
-    model.component('comp1').geom('geom1').feature('r_ThermalOxide').set('contributeto', materialNames(1));
+    model.component('comp1').geom('geom1').feature('r_ThermalOxide').set('contributeto', 'selSubstrate');
     
     % generating cladding 
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'cladding'], 'Rectangle');
     geom_dummy.label('cladding');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hcladding/2+hOEO'});
+    geom_dummy.set('pos', {'0' 'hcladding/2'});
     geom_dummy.set('size', {'wSim' 'hcladding'});    
-    model.component('comp1').geom('geom1').feature('r_cladding').set('contributeto', materialNames(1));
+    model.component('comp1').geom('geom1').feature('r_cladding').set('contributeto', 'selCladding');
     
     % generating bottom WG burried in SiO2
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'photonic_wg_bot'], 'Rectangle');
@@ -45,7 +57,7 @@ function [model] = Geometry(model, varargin)
 	geom_dummy.set('base','center');
     geom_dummy.set('pos', {'0' '-hWG_bot/2'});
     geom_dummy.set('size', {'wWG' 'hWG_bot'});    
-    model.component('comp1').geom('geom1').feature('r_photonic_wg_bot').set('contributeto', materialNames(2));
+    model.component('comp1').geom('geom1').feature('r_photonic_wg_bot').set('contributeto', 'selWG_passive');
 
     % generating top WG 
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'photonic_wg_top'], 'Rectangle');
@@ -53,7 +65,7 @@ function [model] = Geometry(model, varargin)
 	geom_dummy.set('base','center');
     geom_dummy.set('pos', {'0' 'hWG_top/2 + hOEO'});
     geom_dummy.set('size', {'wWG' 'hWG_top'});    
-    model.component('comp1').geom('geom1').feature('r_photonic_wg_top').set('contributeto', materialNames(2));
+    model.component('comp1').geom('geom1').feature('r_photonic_wg_top').set('contributeto', 'selWG_passive');
            
     % generating OEO filling slot 
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'OEO_slot'], 'Rectangle');
@@ -61,7 +73,7 @@ function [model] = Geometry(model, varargin)
 	geom_dummy.set('base','center');
     geom_dummy.set('pos', {'0' 'hOEO/2'});
     geom_dummy.set('size', {'wSim' 'hOEO'});    
-    model.component('comp1').geom('geom1').feature('r_OEO_slot').set('contributeto', materialNames(3));
+    model.component('comp1').geom('geom1').feature('r_OEO_slot').set('contributeto', 'selWG_OEO');
     
     % generating bottom graphene electrode entities
     geom_dummy = model.component('comp1').geom('geom1').create('poly_graphene_bot', 'Polygon');
@@ -70,7 +82,7 @@ function [model] = Geometry(model, varargin)
     geom_dummy.set('type', 'solid'); 
     geom_dummy.set('x', '-wSim/2 wWG/2');
     geom_dummy.set('y', '0 0');
-    model.component('comp1').geom('geom1').feature('poly_graphene_bot').set('contributeto',  materialNames(6));
+    model.component('comp1').geom('geom1').feature('poly_graphene_bot').set('contributeto', 'selWG_Electrodes');
     
     % generating top graphene electrode entities
     geom_dummy = model.component('comp1').geom('geom1').create('poly_graphene_top', 'Polygon');
@@ -79,19 +91,18 @@ function [model] = Geometry(model, varargin)
     geom_dummy.set('type', 'solid'); 
     geom_dummy.set('x', '-wWG/2 wSim/2');
     geom_dummy.set('y', 'hOEO hOEO');
-    model.component('comp1').geom('geom1').feature('poly_graphene_top').set('contributeto', materialNames(6));
+    model.component('comp1').geom('geom1').feature('poly_graphene_top').set('contributeto', 'selWG_Electrodes');
     
     
     % generating geometry
     model.component('comp1').geom('geom1').run;
           
 	% Verifing the substrate selection and prints a report in the command line  
-    for jj = 1:length(materialNames)
+    for jj = 1:length(selectionNames)
         label2print = 'dom'; % Define here if you want to identifiy point 'pnt' or boundary 'bnd' or domain 'dom'
-        result = mphgetselection(model.selection(['geom1_' materialNames{jj} '_' label2print])); 
-        materials.(materialNames{jj}) = result.entities;
-        disp(['Layer' num2str(jj) '-' materialNames{jj} '_' label2print ': [' num2str(result.entities) ']']);
-        pause(0.1);
+        result = mphgetselection(model.selection(['geom1_sel' selectionNames{jj} '_' label2print])); 
+        disp(['Layer' num2str(jj) '-' selectionNames{jj} '_' label2print ': [' num2str(result.entities) ']']);
+        pause(0.25);
     end
     disp('KEEP IN MIND: Higher layer number should overwrite lower layer number during Material ASSIGNMENT');
     % generates matlab plot of geometry and the domain, boundary, point

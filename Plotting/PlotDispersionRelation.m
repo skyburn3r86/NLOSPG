@@ -5,7 +5,7 @@
     
 function [] = PlotDispersionRelation(results, varargin)
 %PLOTDISPERSIONRELATION Summary of this function goes here
-%   Detailed explanation goes here
+% Detailed explanation goes here
     % Collect and Convert Data
     options = struct(...
         'fileName', '');

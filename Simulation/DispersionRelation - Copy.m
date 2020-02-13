@@ -218,7 +218,7 @@ function [model, refr] = DispersionRelation(model, varargin)
     model.component('comp1').func('int1').set('extrap', 'linear');
     model.component('comp1').func('int1').set('argunit', 'nm');
     if args.('calcRefr')
-        fileID = fopen('\DataIn/eps_HD_BB_OH.txt', 'r');
+        fileID = fopen('DataIn/eps_HD_BB_OH.txt', 'r');
         A = fscanf(fileID, '%f\t%f\t%f\n');
         n = A(2:3:end-1);
         k = A(3:3:end);
