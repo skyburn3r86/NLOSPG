@@ -83,16 +83,13 @@ function [model] = meshing(model, varargin)
             model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('hmin', 3.86E-11);
             model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('hminactive', false);
             
-            % adding domains to mesh materialNames{jj}
             objects = mphgetselection(model.selection(['geom1_' materialNames{jj} '_dom']));
             mesh_selection = [];
-            % for-loop scans if the current domain has been asigned
-            % previously. 
             for ii = 1:length(objects.entities)
-                if ~isempty(find(selected_domains == objects.entities(ii)))
-                    mesh_selection = [mesh_selection objects.entities(ii)];
-                    selected_domains = [selected_domains objects.entities(ii)];
+                if ~isempty(find(selected_domains, objects.entities(ii)))
+                    mesh_selection(ii) = objects.entities(find(selected_domains, objects.entities));
                 else
+                    mesh_selection(ii) = objects.entities;
                 end
             end
             model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).selection.set(mesh_selection);

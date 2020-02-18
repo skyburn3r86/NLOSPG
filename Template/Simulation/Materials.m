@@ -7,7 +7,7 @@ function [model] = Materials(model,varargin)
 %MATERIALS Creates the Materials for the Model.
 
     % Define Material Parameters
-    materials = varargin{1}
+    materials = varargin{1};
     materialNames=fieldnames(materials);
     
     % Define material properties for ElectroDynamics argument 
@@ -50,7 +50,7 @@ function [model] = Materials(model,varargin)
         model_dummy.propertyGroup('RefractiveIndex').set('ki', '');
         model_dummy.propertyGroup('RefractiveIndex').set('n', {no '0' '0' '0' ne' '0' '0' '0' no});
         model_dummy.propertyGroup('RefractiveIndex').set('ki', {k '0' '0' '0' k '0' '0' '0' k});
-        objects = mphgetselection(model.selection(['geom1_' materialNames{ii} '_dom']))
+        objects = mphgetselection(model.selection(['geom1_' materialNames{ii} '_dom']));
         model_dummy.selection.set(objects.entities);
            
         if strcmp(name, 'Al2O3') || strcmp(name, 'OEO')

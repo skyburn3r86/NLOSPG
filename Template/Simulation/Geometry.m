@@ -3,7 +3,7 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function [model] = Geometry(model, varargin)
+function model = Geometry(model, varargin)
 %GEOMETRY Generates Geometry of Initialized Parameters (Setup)
     % Get Arguments
     % Selections are containers for geometry entities of certain material
@@ -14,8 +14,8 @@ function [model] = Geometry(model, varargin)
     model.component('comp1').geom.create('geom1', 2);
     
     % generting the selction containers for tracking materials of geometry
-    % 1st entry lowest priority; last highest priority overriding lower
-    % layers
+    % 1st entry lowest priority; last layer highest priority. 
+    % Higher priority: Material assignments of lower priority layers are overwritten
     for jj = 1:length(materialNames)
         selection_container_dummy = model.component('comp1').geom('geom1').selection.create(materialNames{jj}, 'CumulativeSelection');
         selection_container_dummy.label(materialNames(jj));        
@@ -28,9 +28,8 @@ function [model] = Geometry(model, varargin)
     geom_dummy.label('Thermal Oxide');
 	geom_dummy.set('base','center'); % base = center -> pos = center; base = corner -> pos = left bot corner of objects
     geom_dummy.set('pos', {'0' '-hSubstrate/2'}); % first position x, second position y
-    geom_dummy.set('size', {'wSim' 'hSubstrate'});
-    
-    model.component('comp1').geom('geom1').feature('r_ThermalOxide').set('contributeto', materialNames(1));
+    geom_dummy.set('size', {'wSim' 'hSubstrate'});    
+    model.component('comp1').geom('geom1').feature('r_ThermalOxide').set('contributeto', materialNames{1});
     
     % generating cladding 
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'cladding'], 'Rectangle');
@@ -91,7 +90,7 @@ function [model] = Geometry(model, varargin)
         label2print = 'dom'; % Define here if you want to identifiy point 'pnt' or boundary 'bnd' or domain 'dom'
         result = mphgetselection(model.selection(['geom1_' materialNames{jj} '_' label2print])); 
         materials.(materialNames{jj}) = result.entities;
-        disp(['Layer' num2str(jj) '-' materialNames{jj} '_' label2print ': [' num2str(result.entities) ']']);
+        disp(['Layer/Priority' num2str(jj) '-' materialNames{jj} '_' label2print ': [' num2str(result.entities) ']']);
         pause(0.1);
     end
     disp('KEEP IN MIND: Higher layer number should overwrite lower layer number during Material ASSIGNMENT');
@@ -107,18 +106,5 @@ function [model] = Geometry(model, varargin)
             mphgeom(model, 'geom1', 'vertexlabels', 'on');
         otherwise
     end
-    
-    % alternative you can save the model and check the results
-    % mphsave(model, 'test1234');
-    
-%     all = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; -eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')+options(1).('hAir')+eps], 'boundary');
-%     inner = mphselectbox(model, 'geom1', [+eps options(1).('wSim')-eps;eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+options(1).('hContact')+options(1).('hAir')-eps], 'boundary');
-%     BoundarySelection = setdiff(all, inner);
-%     Graphene = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')-eps options(1).('hSubstrate')+eps], 'boundary');
-%     TopContact = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')-eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+eps], 'boundary');
-    BoundarySelection = []; % struct(...
-%         'OuterBoundaries', BoundarySelection, ...
-%         'Graphene', Graphene,...
-%         'TopContact', TopContact);
 end
 

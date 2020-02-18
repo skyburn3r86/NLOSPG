@@ -25,10 +25,8 @@ for ii = 1:length(hWGA_array)
 %         [Simulation, refr] = DispersionRelation(Simulation, 'plot', false); 
         % Builiding the geometry based on ModelSetup_Parameters
         comsol_model = Geometry(comsol_model, materials);
-        
-%         [Simulation, Selections, BoundarySel] = Geometry(Simulation, 'mat', {0, material}, 'Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hBuffer', {0, '[nm]'});
-        [comsol_model] = Materials(comsol_model, materials); 
-        [comsol_model] = meshing(comsol_model, Selections, 'mat', material); 
+        comsol_model = Materials(comsol_model, materials); 
+        [comsol_model] = meshing(comsol_model, materials); 
         [comsol_model] = Physics(comsol_model, BoundarySel, Selections); 
         try
             [comsol_model] = Compute(comsol_model, 'mat', material); 

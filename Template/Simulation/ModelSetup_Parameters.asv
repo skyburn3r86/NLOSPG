@@ -56,15 +56,20 @@ function [model, materials] = ModelSetup_Parameters(varargin)
         'material_passive_photonic', {3e8, '[m/s]'}, ...    
         'wl', {1550, '[nm]'});	
     optionNames=fieldnames(options);
+    
+    % add golbal parameter structer function to do
+    
 	
-	% adding new material done by adding line e.g. 'photonic_passive2' , 'filename.xt' from DataIn folder
+	% adding new material done by adding line e.g. 'photonic_passive2' , 'filename.xt' 
+    % Overlapping geometries -> later entry overrides previous entry (PhotonicWG > Substrate)
+    % Note: Plasmonic waveguides are 
 	materials = struct(...
-		'PhotonicWG', {'eps_Si_Green_2008.txt', []},...
-		'Substrate', {'eps_SiO2_Lemarchand_2013_250nm__2500nm.txt', []},...
-		'OEO', {'eps_HD_BB_OH.txt', []},...
-		'Metal_1', {'eps_Au_IEF_1604.txt', []},...
-		'Metal_2', {'eps_Cu_McPeak.txt', []},...
-		'Graphene', { ' ',[]});
+		'Substrate', 'eps_SiO2_Lemarchand_2013_250nm__2500nm.txt',...
+		'PhotonicWG', 'eps_Si_Green_2008.txt',...
+		'OEO', 'eps_HD_BB_OH.txt',...
+		'Metal_1', 'eps_Au_IEF_1604.txt',...
+		'Metal_2', 'eps_Cu_McPeak.txt',...
+		'Graphene', ' ');
     MaterialNames=fieldnames(materials);
 	
     nArgs = length(varargin);
@@ -116,14 +121,14 @@ function [model, materials] = ModelSetup_Parameters(varargin)
 	% II) Interpolation defined by files in DataIn folder. 3columns with 1st-wavelength, 2nd-real, 3rd-imag 	
 	for ii = 1:length(MaterialNames)
         name = MaterialNames{ii};
-        str_file = materials(1).(name); 
-        if ~isempty(strfind(materials(1).(name), '.txt'))
-            % true if interpolation file defined in materials(1)
+        str_file = materials.(name); 
+        if ~isempty(strfind(materials.(name), '.txt'))
+            % ture if interpolation file defined for material
             interpDummy = model.func.create(MaterialNames{ii}, 'Interpolation');
             interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
             interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
             interpDummy.set('source', 'file');
-            interpDummy.set('filename', [library_path str_file]);
+            interpDummy.set('filename', [library_path '\' str_file]);
             interpDummy.set('extrap', 'linear');
             interpDummy = [];
         else
