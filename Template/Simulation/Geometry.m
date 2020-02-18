@@ -8,7 +8,7 @@ function [model] = Geometry(model, varargin)
     % Get Arguments
     % Selections are containers for geometry entities of certain material
     
-    materials = varargin{1}
+    materials = varargin{1};
     materialNames=fieldnames(materials);
     % ***************** Create Geometry
     model.component('comp1').geom.create('geom1', 2);
@@ -29,6 +29,7 @@ function [model] = Geometry(model, varargin)
 	geom_dummy.set('base','center'); % base = center -> pos = center; base = corner -> pos = left bot corner of objects
     geom_dummy.set('pos', {'0' '-hSubstrate/2'}); % first position x, second position y
     geom_dummy.set('size', {'wSim' 'hSubstrate'});
+    
     model.component('comp1').geom('geom1').feature('r_ThermalOxide').set('contributeto', materialNames(1));
     
     % generating cladding 
@@ -63,9 +64,9 @@ function [model] = Geometry(model, varargin)
     geom_dummy.set('size', {'wSim' 'hOEO'});    
     model.component('comp1').geom('geom1').feature('r_OEO_slot').set('contributeto', materialNames(3));
     
-    % generating bottom graphene electrode entities
+    % generating bottom graphene electrode entities via a Polygon
     geom_dummy = model.component('comp1').geom('geom1').create('poly_graphene_bot', 'Polygon');
-    geom_dummy.set('source', 'vectors');
+    geom_dummy.set('source', 'vectors'); % points are defined via vactor 
     % type: 'solid' filled object, 'closed' last and first point are conected, 'open' only lines between defined points of vector 
     geom_dummy.set('type', 'solid'); 
     geom_dummy.set('x', '-wSim/2 wWG/2');

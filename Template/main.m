@@ -1,15 +1,7 @@
 modelpath = pwd;
-% path for global variabls, material data, etc
-global library_path 
+% path for global variabls, paths, material data, etc
 cd('../');
-addpath([library_path '\DataIn'])
-cd('DataIn');
-library_path = pwd;
-cd(modelpath)
-addpath([modelpath '\Evaluation'])
-addpath([modelpath '\Plotting'])
-addpath([modelpath '\QuantumEvaluation'])
-addpath([modelpath '\Simulation'])
+initPaths(modelpath);
 
 N = 25;
 wWGA = 600;
