@@ -74,7 +74,7 @@ function [model] = Compute(model)
 
     % Create Eigenvalue thingy
     model.sol('sol1').create('e1', 'Eigenvalue');
-    model.sol('sol1').feature('e1').set('neigs', nr_modes);
+    model.sol('sol1').feature('e1').set('neigs', 6);
     model.sol('sol1').feature('e1').set('shift', '1');
     model.sol('sol1').feature('e1').set('control', 'mode');
     model.sol('sol1').feature('e1').set('linpmethod', 'sol');
@@ -91,6 +91,37 @@ function [model] = Compute(model)
     model.sol('sol1').feature('v2').set('control', 'mode');
     model.sol('sol1').attach('std1');
     
+%     % creates parameteric sweep here 
+%     model.study('std1').create('param', 'Parametric');
+%     model.study('std1').feature('param').setIndex('plistarr', '', 0);
+%     model.study('std1').feature('param').setIndex('punit', 'm', 0);
+%     model.study('std1').feature('param').setIndex('pname', 'wl', 0);
+%     model.study('std1').feature('param').setIndex('plistarr', 'range(lmin,(lmax-lmin)/(Nl-1),lmax)', 0);
+% 
+%     model.batch.create('p1', 'Parametric');
+%     model.batch('p1').study('std1');
+%     model.batch('p1').create('so1', 'Solutionseq');
+%     model.batch('p1').feature('so1').set('seq', 'sol1');
+%     model.batch('p1').feature('so1').set('store', 'on');
+%     model.batch('p1').feature('so1').set('clear', 'on');
+%     model.batch('p1').feature('so1').set('psol', 'none');
+%     model.batch('p1').set('pname', {'wl'});
+%     model.batch('p1').set('plistarr', {'range(lmin,(lmax-lmin)/(Nl-1),lmax)'});
+%     model.batch('p1').set('sweeptype', 'sparse');
+%     model.batch('p1').set('probesel', 'all');
+%     model.batch('p1').set('probes', {});
+%     model.batch('p1').set('plot', 'off');
+%     model.batch('p1').set('err', 'on');
+%     model.batch('p1').attach('std1');
+%     model.batch('p1').set('control', 'param');
+% 
+%     model.sol.create('sol3');
+%     model.sol('sol3').study('std1');
+%     model.sol('sol3').label('Parametric Solutions 1');
+%     model.batch('p1').feature('so1').set('psol', 'sol2');
+
     model.sol('sol1').runAll;
+%     model.batch('p1').run;
+    model.component('comp1').mesh('mesh1').run;
 end
 

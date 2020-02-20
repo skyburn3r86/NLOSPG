@@ -3,7 +3,7 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function [model] = Physics(model, Boundaries, Domains, varargin)
+function [model] = Physics(model, varargin)
 %PHYSICS Summary of this function goes here
 %   Detailed explanation goes here
     options = struct(...
@@ -12,53 +12,64 @@ function [model] = Physics(model, Boundaries, Domains, varargin)
 
     optionNames=fieldnames(options);
 
-    nArgs = length(varargin);
-    if round(nArgs/2)~=nArgs/2
-       error('Arguments needs propertyName/propertyValue pairs')
-    end
-
-    for pair = reshape(varargin,2,[])
-        inpName = pair{1};
-       if any(strcmp(inpName,optionNames))
-           if isa(pair{2}, 'cell')
-                options(1).(inpName) = pair{2}{1};
-                options(2).(inpName) = pair{2}{2};
-           else
-               options(1).(inpName) = pair{2};
-               options(2).(inpName) = pair{2};
-           end
-
-       else
-          error('%s is not a recognized parameter name',inpName)
-       end
-    end
-
+    materials = varargin{1};
+    materialNames=fieldnames(materials);
+      
     % Add ElectroDynamics Frequency Domain
     model.component('comp1').physics.create('ewfd', 'ElectromagneticWavesFrequencyDomain', 'geom1');
     model.component('comp1').physics('ewfd').create('sctr1', 'Scattering', 1);
-    model.component('comp1').physics('ewfd').feature('sctr1').selection.set(Boundaries.('OuterBoundaries'));
+    % define here materials that touch the scattering boundary. Edges of this materail that
+    % are not in contact with the simulation box are ignored. 
+    material_scattering = {'Substrate', 'OEO'};
+    selection = [];
+    for jj = 1:length(material_scattering)
+        object = mphgetselection(model.selection(['geom1_' material_scattering{jj} '_bnd']));
+        selection = [selection object.entities];    
+    end
+    % selection cross-check via
+    figure(1)
+    mphgeom(model, 'geom1', 'Edgelabels', 'on');    
+    model.component('comp1').physics('ewfd').feature('sctr1').selection.set(selection);
 
     % Add Graphene (Kubo Formulism)
     model.component('comp1').physics('ewfd').create('scu1', 'SurfaceCurrent', 1);
-    model.component('comp1').physics('ewfd').feature('scu1').selection.set(Boundaries.('Graphene'));
+    % define string label of graphene
+    material_scattering = {'Graphene'};
+    selection = [];
+    for jj = 1:length(material_scattering)
+        object = mphgetselection(model.selection(['geom1_' material_scattering{jj} '_bnd']));
+        selection = [selection object.entities];    
+    end
+    % selection cross-check via    
+    model.component('comp1').physics('ewfd').feature('scu1').selection.set(selection);
     model.component('comp1').physics('ewfd').feature('scu1').set('Js0', {'sigmaxx*ewfd.Ex' 'sigmayy*ewfd.Ey' 'sigmazz*ewfd.Ez'});
 
-    % Add Electrostatics
+    % Add Electrostatics - here limited to the OEO domain between top and
+    % bottom silicon 
     model.component('comp1').physics.create('es', 'Electrostatics', 'geom1');
-    model.component('comp1').physics('es').selection.set([Domains.('Organics') Domains.('Al2O3')]);
+    material_scattering = {'OEO'};
+    selection = [];
+    for jj = 1:length(material_scattering)
+        object = mphgetselection(model.selection(['geom1_' material_scattering{jj} '_dom']));
+        selection = [selection object.entities];    
+    end
+    model.component('comp1').physics('es').selection.set(selection);
+    
     % Create Ground Potential
-    model.component('comp1').physics('es').create('gnd1', 'Ground', 1);
-    model.component('comp1').physics('es').feature('gnd1').selection.set(Boundaries.('TopContact'));
+    model.component('comp1').physics('es').create('gnd1', 'Ground', 1);    
+    selection = [12 17];
+    model.component('comp1').physics('es').feature('gnd1').selection.set(selection);
 
     % Create Electrode Potential
     model.component('comp1').physics('es').create('pot1', 'ElectricPotential', 1);
-    model.component('comp1').physics('es').feature('pot1').selection.set(Boundaries.('Graphene'));
-    % Set Voltage
-    V = '0 [V]';
-    if isa(options(1).('V'), 'double') || isa(options(1).('V'), 'float') || isa(options(1).('V'), 'int')
-        V = [num2str(options(1).('V')) options(2).('V')];
-    else
-        V = options(1).('V');
-    end
-    model.component('comp1').physics('es').feature('pot1').set('V0', V);
+    selection = [4 10];
+    model.component('comp1').physics('es').feature('pot1').selection.set(selection);
+%     % Set Voltage
+%     V = '0 [V]';
+%     if isa(options(1).('V'), 'double') || isa(options(1).('V'), 'float') || isa(options(1).('V'), 'int')
+%         V = [num2str(options(1).('V')) options(2).('V')];
+%     else
+%         V = options(1).('V');
+%     end
+    model.component('comp1').physics('es').feature('pot1').set('V0', 'V_bias');
 end

@@ -7,7 +7,7 @@
 
 function initPaths(modelpath)
 %initPaths - loads the path of the base model, functions, class and material data
-
+    global library_path;
     library_path = pwd;
     %% add here cross user files, class, 
     addpath([library_path '\DataIn'])

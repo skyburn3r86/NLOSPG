@@ -15,11 +15,11 @@ function [model] = Materials(model,varargin)
         if ~isempty(strfind(materials.(materialNames{jj}), '.txt'))
             if strcmp(materialNames{jj}, 'OEO')
                 % special case
-                models.(['n_' materialNames{jj} '_eoAxis']) = ['real(sqrt(eps' materialNames{jj} '(wl)+i*eps' materialNames{jj} '(wl)))'];
-                models.(['k_' materialNames{jj} '_eoAxis']) = ['real(sqrt(eps' materialNames{jj} '(wl)+i*eps' materialNames{jj} '(wl)))'];
+                models.(['n_' materialNames{jj} '_eoAxis']) = ['real(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
+                models.(['k_' materialNames{jj} '_eoAxis']) = ['imag(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
             end
-            models.(['n_' materialNames{jj}]) = ['real(sqrt(eps' materialNames{jj} '(wl)+i*eps' materialNames{jj} '(wl)))'];
-            models.(['k_' materialNames{jj}]) = ['real(sqrt(eps' materialNames{jj} '(wl)+i*eps' materialNames{jj} '(wl)))'];
+            models.(['n_' materialNames{jj}]) = ['real(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
+            models.(['k_' materialNames{jj}]) = ['imag(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
         else
             models.(['n_' materialNames{jj}]) = '0';
             models.(['k_' materialNames{jj}]) = '1';

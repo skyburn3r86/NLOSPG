@@ -3,7 +3,7 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
 
-function [model, materials] = ModelSetup_Parameters(varargin)
+function [model, materials, comsol_parameters] = ModelSetup_Parameters(varargin)
     %GEOMETRY Setup of Model
     %   Detailed explanation goes here
 	global library_path 
@@ -14,7 +14,8 @@ function [model, materials] = ModelSetup_Parameters(varargin)
     % ASiNx... l0SiNx... Materials defined by analytic expressions
     % e,... c_0 physical constants add new if needed don't delete old
     % wl opertion wavelength of simulation
-    options = struct(...
+    % default values are
+    comsol_parameters = struct(...
         'wSim', {6, '[um]'},...
         'hSubstrate', {4, '[um]'},...
         'hWG_top', {160, '[nm]'},...
@@ -29,6 +30,8 @@ function [model, materials] = ModelSetup_Parameters(varargin)
         'lmax', {2300, '[nm]'}, ...
         'Nl', {25, ' '}, ...	
         'f_rf', {9e9, '[Hz]'}, ...	
+        'n_start', {3, ' '},...
+        'nr_modes', {3, ' '},...
         'V_bias', {1, '[V]'}, ...	
         'ASiO2', {0.69617, ' '}, ...
         'BSiO2', {0.40794, ' '}, ...
@@ -54,24 +57,29 @@ function [model, materials] = ModelSetup_Parameters(varargin)
         'mu0', {1.2566e-6, '[H/m]'}, ...
         'c_0', {3e8, '[m/s]'}, ...   
         'material_passive_photonic', {3e8, '[m/s]'}, ...    
-        'wl', {1550, '[nm]'});	
-    optionNames=fieldnames(options);
-    
-    % add golbal parameter structer function to do
-    
-	
+        'wl', {1550, '[nm]'},...
+        'plasmonic_mesh', {150, ' '},...
+        'omega', {'2*pi*c_const/wl', ''},...
+        'gamma', {'0.001*omega', ''},...
+        'sigmaxx', {'-1i*e^2/(4*pi*hbar)*log((-omega + 1i*2*gamma)/(+omega + 1i*2*gamma))', ''},...
+        'sigmayy', {0, '[S]'},...
+        'sigmazz', {'-1i*e^2/(4*pi*hbar)*log((-omega + 1i*2*gamma)/(+omega + 1i*2*gamma))', ''});	
+    optionNames=fieldnames(comsol_parameters);
+
 	% adding new material done by adding line e.g. 'photonic_passive2' , 'filename.xt' 
-    % Overlapping geometries -> later entry overrides previous entry (PhotonicWG > Substrate)
-    % Note: Plasmonic waveguides are 
+    % Overlapping geometries -> later entry overrides previous entry (eg. PhotonicWG > Substrate)
+    % Note: Plasmonic waveguides materials MUST BE initialized by Metal_xx... 
+    %       Electrodes MUST be initialized by Electrodes_xx to enable automating meshing
 	materials = struct(...
 		'Substrate', 'eps_SiO2_Lemarchand_2013_250nm__2500nm.txt',...
 		'PhotonicWG', 'eps_Si_Green_2008.txt',...
-		'OEO', 'eps_HD_BB_OH.txt',...
+		'OEO', 'eps_HD_BB_OH_UniWashington.txt',...
 		'Metal_1', 'eps_Au_IEF_1604.txt',...
 		'Metal_2', 'eps_Cu_McPeak.txt',...
 		'Graphene', ' ');
     MaterialNames=fieldnames(materials);
 	
+    % redefine model paramters handed over
     nArgs = length(varargin);
     if round(nArgs/2)~=nArgs/2
        error('Arguments needs propertyName/propertyValue pairs')
@@ -80,8 +88,8 @@ function [model, materials] = ModelSetup_Parameters(varargin)
     for pair = reshape(varargin,2,[])
         inpName = pair{1};
        if any(strcmp(inpName,optionNames))
-          options(1).(inpName) = pair{2}{1};
-          options(2).(inpName) = pair{2}{2};
+          comsol_parameters(1).(inpName) = pair{2}{1};
+          comsol_parameters(2).(inpName) = pair{2}{2};
        else
           error('%s is not a recognized parameter name',inpName)
        end
@@ -94,20 +102,20 @@ function [model, materials] = ModelSetup_Parameters(varargin)
     model = ModelUtil.create('Model');
     model.modelPath(pwd);
     model.label('OEO_Slot.mph');
+    
 
     % Set Model Parameters
     for ii = 1:length(optionNames)
         name = optionNames{ii};
-        str_file = options(1).(name);
-        unit = options(2).(name);
+        str_file = comsol_parameters(1).(name);
+        unit = comsol_parameters(2).(name);
         if isa(str_file, 'double')
             str_file = num2str(str_file);
         end
         model.param.set(name, [str_file, ' ', unit]);
     end
-    model.component.create('comp1', true);
-	
-	
+    model.component.create('comp1', true);	
+    
 	% Setup Material - Input wavelength is given in nm input arguments is wl*1e9.
 	% I) Analytic (sellmaier, lorentz, drude etc,) defined by model parameters
 	model.func.create('Graphene', 'Analytic');
@@ -128,13 +136,12 @@ function [model, materials] = ModelSetup_Parameters(varargin)
             interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
             interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
             interpDummy.set('source', 'file');
-            interpDummy.set('filename', [library_path '\' str_file]);
+            interpDummy.set('filename', [library_path '\DataIn\' str_file]);
             interpDummy.set('extrap', 'linear');
             interpDummy = [];
         else
             
         end
     end
-	
 end
 

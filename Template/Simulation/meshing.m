@@ -43,35 +43,14 @@ function [model] = meshing(model, varargin)
             else % case of photonic waveguide/components
                 % open the txt file of the material to extract the data and
                 % interpolate the refractive index
-                fileID = fopen(materials.(materialNames{jj}),'r');
-                dataMaterial = textscan(fileID, '%f%f%f', 'Delimiter', '\t');
-                fileID = fclose(fileID); 
-                
-                % extract wavelength (wl) from comsol model
-                strWl = char(model.param.get('wl'));
-                wl = str2num(strWl(1:strfind(strWl, '[')-2));
-                prefactor_str = (strWl(strfind(strWl, '['):end));
-                switch prefactor_str 
-                    case '[pm]'
-                       prefactor = 1e-12;
-                    case '[nm]'
-                       prefactor = 1e-9;
-                    case '[um]'
-                       prefactor = 1e-6;
-                    case '[mm]'
-                       prefactor = 1e-3;
-                    otherwise
-                       prefactor = 1;
-                end
-                % interpolation is in nanometer as 
-                refractive_index = interp1(dataMaterial{1} ,real(sqrt(dataMaterial{2} +i*dataMaterial{3})),wl*prefactor*1e9, 'linear','extrap');                
+                refractive_index = real(extractRefractiveIndex(materials.(materialNames{jj}), 'model', model));
                 meshsize = ['wl/' num2str(refractive_index) '/8'];       
                 xscale = 1;
                 yscale = 1;
             end
             % adding triangular mesh
             model.component('comp1').mesh('mesh1').create(['ftri', materialNames{jj}], 'FreeTri');
-            model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).label(['ftri', materialNames{jj}])
+            model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).label(['ftri', materialNames{jj}]);
             model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).set('xscale', xscale);
             model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).set('yscale', yscale);
             model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).selection.geom('geom1', 2);
@@ -89,16 +68,14 @@ function [model] = meshing(model, varargin)
             % for-loop scans if the current domain has been asigned
             % previously. 
             for ii = 1:length(objects.entities)
-                if ~isempty(find(selected_domains == objects.entities(ii)))
+                if isempty(find(selected_domains == objects.entities(ii)))
                     mesh_selection = [mesh_selection objects.entities(ii)];
                     selected_domains = [selected_domains objects.entities(ii)];
-                else
                 end
             end
             model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).selection.set(mesh_selection);
         end  
     end
     model.component('comp1').mesh('mesh1').run;
-    mphsave(model,'tset')   
 end
 
