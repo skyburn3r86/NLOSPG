@@ -11,22 +11,24 @@ hOrganicA = linspace(200, 300, 3)*1e-9;
 wl = 1550e-9;
 % reads refractive index of photonic waveguide as start value
 n_start = real(extractRefractiveIndex(materials.PhotonicWG, 'wavelength', wl)); 
-nr_modes = 3;
+nr_modes = 4;
 
 nu = cell(length(hWGA_array), length(hOrganicA));
 losses = cell(length(hWGA_array), length(hOrganicA));
 
-for ii = 1:length(hWGA_array)
-    for kk = 1:length(hOrganicA)
-        hOrganic = hOrganicA(kk);
-        hWG = hWGA_array(ii);
+for idx_row = 1:length(hWGA_array)
+    for idx_col = 1:length(hOrganicA)
+        hOrganic = hOrganicA(idx_col);
+        hWG = hWGA_array(idx_row);
         DumpingName = [num2str(hOrganic) 'm_' num2str(hWG) 'm_'];
         % Simulate
         % ModelSetup_Parameters - init Model and defines parameters
         [comsol_model, materials, sim_parameters] = ModelSetup_Parameters('wl', {wl, '[m]'}, 'n_start', {n_start, ' '},...
             'hWG_top', {hWG, '[m]'}, 'hOrganic', {hOrganic, '[m]'}, 'hBuffer', {0, '[m]'},...
         'nr_modes', {nr_modes, ' '});
-        % DispersionRelation - what is the purpose of this? Shouldnt we
+        sim_parameters(1).idx_row = idx_row;        
+        sim_parameters(1).idx_col = idx_col;
+        % TODO DispersionRelation - what is the purpose of this? Shouldnt we
         % include that into our material libary? 
 %         [Simulation, refr] = DispersionRelation(Simulation, 'plot', false); 
         % Builiding the geometry based on ModelSetup_Parameters
@@ -41,21 +43,21 @@ for ii = 1:length(hWGA_array)
         end
 
         % Save & Evaluate
-        if 1
+        if 0
             mphsave(comsol_model, ['./ComsolModels/' DumpingName '_Model.mph']);
         end
-        [Results] = Evaluation(comsol_model, sim_parameters);
+        [Results] = comsolEvaluation(comsol_model, sim_parameters, materials);
         save(['./ComsolModels/' DumpingName '_Results.mat'], 'Results');
         %dumpStruct(Results, ['./Data/200109_' DumpingName '_ResultsDump.csv']);
-        try
-            PlotDispersionRelation(Results, 'fileName', DumpingName);
-        catch
-           disp(['Error at Plotting' DumpingName])
-           continue
-        end
+%         try
+%             PlotDispersionRelation(Results, 'fileName', DumpingName);
+%         catch
+%            disp(['Error at Plotting' DumpingName])
+%            continue
+%         end
 
-        nu{ii, kk} = QuantumEvaluation(comsol_model, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
-        losses{ii, kk} = AssignResults(Results, hWG, hOrganic);
+        nu{idx_row, idx_col} = QuantumEvaluation(comsol_model, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
+        losses{idx_row, idx_col} = AssignResults(Results, hWG, hOrganic);
     end
 end
 

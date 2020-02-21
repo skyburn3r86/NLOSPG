@@ -143,6 +143,5 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(varargin)
             
         end
     end
-	comsol_parameters
 end
 

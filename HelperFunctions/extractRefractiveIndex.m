@@ -18,7 +18,7 @@ function refractive_index = extractRefractiveIndex(materialName, varargin)
         for ii = 1:length(varargin)-1
             switch varargin{ii}
                 case 'wavelength'
-                    wavelength = varargin{ii+1}
+                    wavelength = varargin{ii+1};
                 case 'model'
                     model = varargin{ii+1};
                     % extract wavelength (wl) from comsol model
