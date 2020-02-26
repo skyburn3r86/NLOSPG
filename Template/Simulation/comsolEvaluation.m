@@ -3,7 +3,7 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function [simulation_results, simulation_parameters] = comsolEvaluation(model, simulation_parameters, materials, varargin)
+function simulation_results = comsolEvaluation(model, simulation_parameters, materials, varargin)
 %EVALUATION Evaluates the Simulation and can be adapted to your individual
 %style
 % VARARGIN options (extend on need)
@@ -21,19 +21,19 @@ function [simulation_results, simulation_parameters] = comsolEvaluation(model, s
     
     % finding modes
     [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,...
-        'substrate', materials.Substrate,'deltaN_threshold', 0.1, 'polarization_threshold', 2);
+        'substrate', materials.Substrate,'deltaN_threshold', 0.1, 'polarization_threshold', 0.5);
     
     % plotting and saving modes
-    for jj = 1:neffTE
+    for jj = 1:length(nr_solutionTM)
         title_str = ['Row ' num2str(simulation_parameters(1).idx_row) ...
             '__Col ' num2str(simulation_parameters(1).idx_col) ...
-            '__TEpol'];
-        saveSolutionSnapshot(model, 'expression', 'ewfd.normE', 'nr_solution', nr_solutionTE(jj),...
+            '__TMpol'];
+        saveSolutionSnapshot(model, 'expression', 'ewfd.normE', 'nr_solution', nr_solutionTM(jj),...
             'title', title_str);
     end
     
     % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode
-        nr_solutionTM = 
+    simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEO', 'nr_solution', nr_solutionTM(1));
          
         
 % % % % % % % % %         Quantum Calculations..

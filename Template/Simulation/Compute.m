@@ -22,6 +22,8 @@ function [model] = Compute(model)
     model.study('std1').feature('mode').activate('ewfd', true);
     model.study('std1').feature('mode').set('modeFreq', 'c_const/wl');
     model.study('std1').feature('mode').set('shiftactive', true);
+    
+    model.study('std1').feature('mode').setIndex('activate', false, 3);
     % defines the value around which solutions are searched
     model.study('std1').feature('mode').set('shift', 'n_start');
     % defines the number of solutions searched for    

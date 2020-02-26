@@ -2,7 +2,7 @@ function out = model
 %
 % test.m
 %
-% Model exported on Feb 20 2020, 15:41 by COMSOL 5.4.0.246.
+% Model exported on Feb 21 2020, 14:55 by COMSOL 5.4.0.246.
 
 import com.comsol.model.*
 import com.comsol.model.util.*
@@ -382,5 +382,119 @@ model.result('pg1').set('looplevel', [3]);
 model.result('pg1').run;
 model.result('pg1').set('looplevel', [1]);
 model.result('pg1').run;
+
+model.study('std1').create('param', 'Parametric');
+model.study('std1').feature.remove('param');
+
+model.result('pg1').run;
+model.result('pg1').run;
+model.result('pg1').run;
+model.result('pg1').run;
+model.result('pg1').run;
+model.result('pg2').run;
+model.result('pg2').set('data', 'dset2');
+model.result('pg2').run;
+model.result('pg1').run;
+model.result('pg1').run;
+model.result.numerical.create('int1', 'IntSurface');
+model.result.numerical('int1').set('intvolume', true);
+model.result.numerical('int1').setIndex('expr', 'sqrt(eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2)))', 0);
+model.result.numerical('int1').selection.set([1 2 3 4 5]);
+model.result.numerical('int1').setIndex('expr', '(eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2)))', 0);
+model.result.numerical('int1').setIndex('expr', 'sqrt(eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2)))', 0);
+model.result.numerical('int1').setIndex('expr', '(eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2)))', 0);
+model.result.numerical.create('gev1', 'EvalGlobal');
+model.result.numerical('gev1').set('expr', {'es.zref'});
+model.result.numerical('gev1').set('descr', {'Reference impedance'});
+model.result.numerical('gev1').set('unit', {['ohm' ]});
+model.result.table.create('tbl1', 'Table');
+model.result.table('tbl1').comments('Global Evaluation 1 (es.zref)');
+model.result.numerical('gev1').set('table', 'tbl1');
+model.result.numerical('gev1').setResult;
+model.result.numerical.remove('gev1');
+model.result.numerical.create('gmev1', 'EvalGlobalMatrix');
+model.result.numerical.create('gev1', 'EvalGlobal');
+model.result.numerical('gev1').setIndex('expr', '(hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2)', 0);
+model.result.table.create('tbl2', 'Table');
+model.result.table('tbl2').comments('Global Evaluation 1 ((hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2))');
+model.result.numerical('gev1').set('table', 'tbl2');
+model.result.numerical('gev1').set('data', 'dset2');
+model.result.table.create('tbl3', 'Table');
+model.result.table('tbl3').comments('Global Evaluation 1 ((hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2))');
+model.result.numerical('gev1').set('table', 'tbl3');
+model.result.table.create('tbl4', 'Table');
+model.result.table('tbl4').comments('Global Evaluation 1 ((hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2))');
+model.result.numerical('gev1').set('table', 'tbl4');
+model.result.numerical('int1').setIndex('expr', '(hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2)', 1);
+model.result.numerical('int1').setIndex('expr', '(hbar*omega*2/(eps0*es.epsilonryy*wWG^2/hOEO)/V_bias^2)', 1);
+model.result.numerical('int1').setIndex('expr', 'hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2', 1);
+model.result.numerical('int1').setIndex('expr', 'hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO*V_bias^2)', 1);
+model.result.numerical('int1').setIndex('expr', 'omega', 2);
+model.result.numerical('int1').setIndex('expr', '', 2);
+model.result.numerical('int1').setIndex('expr', '2*pi*c_const/wl', 2);
+model.result.numerical('int1').setIndex('expr', 'c_const/wl', 2);
+model.result.numerical('int1').setIndex('expr', 'c_const', 2);
+
+model.param.set('omega', '2*pi*c_0/wl');
+
+model.result.numerical('int1').setIndex('expr', '2*pi*c_0/wl', 2);
+model.result.numerical('gev1').setIndex('expr', '2*pi*c_0/wl', 1);
+model.result.numerical('gev1').setIndex('expr', '', 1);
+model.result.numerical('gev1').setIndex('expr', 'hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO*V_bias^2)', 1);
+model.result.numerical('gev1').setIndex('expr', 'omega', 2);
+model.result.numerical('gev1').setIndex('expr', 'hbar*omega', 2);
+model.result.numerical('gev1').setIndex('expr', 'hbar*omega/eps0', 2);
+model.result.numerical('gev1').setIndex('expr', 'hbar*omega/eps0/V_bias', 2);
+model.result.numerical('gev1').setIndex('expr', 'hbar*omega/eps0/V_bias^2', 2);
+model.result.numerical('gev1').setIndex('expr', 'eps0/V_bias^2', 2);
+model.result.numerical('gev1').setIndex('expr', '1/eps0*V_bias^2', 2);
+model.result.numerical('gev1').setIndex('expr', 'eps0*V_bias^2', 2);
+model.result.numerical('gev1').setIndex('expr', 'eps0*es.epsilonryy*wWG/hOEO*V_bias^2)/(hbar*omega*2)', 1);
+model.result.numerical('gev1').setIndex('expr', '(eps0*es.epsilonryy*wWG/hOEO*V_bias^2)/(hbar*omega*2)', 1);
+model.result.numerical('gev1').setIndex('expr', '', 2);
+model.result.numerical('gev1').setIndex('expr', '(eps0*es.epsilonryy*wWG/hOEO*V_bias^2)', 1);
+model.result.table.create('tbl5', 'Table');
+model.result.table('tbl5').comments('Global Evaluation 1 ((hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2), (eps0*es.epsilonryy*wWG/hOEO*V_bias^2), )');
+model.result.numerical('gev1').set('table', 'tbl5');
+model.result.table.create('tbl6', 'Table');
+model.result.table('tbl6').comments('Global Evaluation 1 ((hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO)/V_bias^2), (eps0*es.epsilonryy*wWG/hOEO*V_bias^2), )');
+model.result.numerical('gev1').set('table', 'tbl6');
+model.result.numerical('int1').setIndex('expr', '(eps0*es.epsilonryy*wWG/hOEO*V_bias^2)', 2);
+model.result.table.create('tbl7', 'Table');
+model.result.table('tbl7').comments('Surface Integration 1 ((eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2))), hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO*V_bias^2), (eps0*es.epsilonryy*wWG/hOEO*V_bias^2))');
+model.result.numerical('int1').set('table', 'tbl7');
+model.result.numerical('int1').selection.set([2]);
+model.result.table.create('tbl8', 'Table');
+model.result.table('tbl8').comments('Surface Integration 1 ((eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2))), hbar*omega*2/(eps0*es.epsilonryy*wWG/hOEO*V_bias^2), (eps0*es.epsilonryy*wWG/hOEO*V_bias^2))');
+model.result.numerical('int1').set('table', 'tbl8');
+model.result.numerical('int1').setResult;
+model.result.numerical('int1').setIndex('expr', '(eps0*es.epsilonryy*wWG^2/hOEO*V_bias^2)', 2);
+model.result.numerical('int1').setIndex('expr', '(eps0*es.epsilonryy*wWG^2/hOEO*V_bias^2)/[N]', 2);
+model.result.numerical('int1').setIndex('expr', '', 2);
+model.result.numerical('int1').setIndex('expr', '', 1);
+model.result.numerical('int1').setIndex('expr', '(omega/4*eps0*(ewfd.nyy^2*((ewfd.Ey)*conj((ewfd.Ey))*es.Ey)', 0);
+model.result.numerical('int1').setIndex('expr', '(omega/4*eps0*ewfd.nyy^2*ewfd.Ey*conj(ewfd.Ey)*es.Ey)', 0);
+model.result.numerical('int1').setIndex('expr', '(omega/2*eps0*ewfd.nyy^4*ewfd.Ey*conj(ewfd.Ey)*es.Ey)*r', 0);
+model.result.numerical('int1').setIndex('expr', '(omega/2*eps0*ewfd.nyy^4*ewfd.Ey*conj(ewfd.Ey)*es.Ey)*r33', 0);
+model.result.numerical('int1').setIndex('expr', 'es.Ey', 1);
+model.result.table.create('tbl9', 'Table');
+model.result.table('tbl9').comments('Surface Integration 1 ((omega/2*eps0*ewfd.nyy^4*ewfd.Ey*conj(ewfd.Ey)*es.Ey)*r33, es.Ey, )');
+model.result.numerical('int1').set('table', 'tbl9');
+model.result.numerical('int1').setResult;
+
+model.study('std1').feature('mode').setIndex('activate', false, 3);
+model.study('std1').feature('mode').setIndex('activate', true, 3);
+model.study('std1').feature('mode').setIndex('activate', false, 3);
+model.study('std1').feature('mode').setIndex('activate', true, 3);
+model.study('std1').feature('mode').setIndex('activate', false, 3);
+
+model.sol('sol1').runAll;
+
+model.result('pg1').run;
+model.result('pg1').run;
+model.result('pg1').feature('surf1').set('expr', 'es.Ey');
+model.result('pg1').run;
+
+model.study('std1').feature('mode').setIndex('activate', true, 3);
 
 out = model;

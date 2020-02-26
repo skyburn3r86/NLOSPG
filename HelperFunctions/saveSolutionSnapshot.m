@@ -73,7 +73,7 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = saveSolutionSnapshot(m
         yc = my/mt;
         
         % Plot and Save the Mode Profile
-%         figure('Visible', 'off')
+        figure('Visible', 'off')
         pcolor(X*1e6,Y*1e6,expression_Z_data)
         colormap hot;
         shading interp;

@@ -25,10 +25,10 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,
     
     %% default value definition
     % Threshold value (0.1) needs to be tested for you case.
-    deltaN_threshold = 0;
+    deltaN_threshold = 0.1;
     % Note, neff < ncladding/substrate -> no guided/physical mode.
-    n_cladding = 1;
-    polarization_threshold = 2;
+    n_cladding = 1.44;
+    polarization_threshold = 0.5;
     
     %% scans through varagin. -1 and +1 of for loop due to option/value pairs
         for ii = 1:length(varargin)-1
@@ -53,14 +53,14 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,
         % sorting refractive index largest (fundamental) to smallest (higher order modes) value.
         idxPhysicalMode = (neff > n_cladding + deltaN_threshold);
         % Next differentiation between TE/TM polarization (measured parallel to substrate) is still needed.
-        fieldEx = mphint2(model, 'abs(ewfd.Ex)', 'surface', 'dataset', 'dset1', 'outersolnum', 1);
-        fieldEy = mphint2(model, 'abs(ewfd.Ey)', 'surface', 'dataset', 'dset1', 'outersolnum', 1);
-        ratioExEy = fieldEx./fieldEy;
+        fieldEx = mphint2(model, 'abs(ewfd.Ex)^2', 'surface', 'dataset', 'dset1', 'outersolnum', 1);
+        fieldEy = mphint2(model, 'abs(ewfd.Ey)^2', 'surface', 'dataset', 'dset1', 'outersolnum', 1);
+        lumericalTETMdefinition = fieldEx./(fieldEy+fieldEx);
         % ratio > 2 indicates TE polarization - no guarantee. The threshold
         % value is an number based on experience and should not be take for
         % granted. Larger values -> stronger polarized mode.
         % TE Mode
-        idxTE = (ratioExEy > polarization_threshold);
+        idxTE = (lumericalTETMdefinition > polarization_threshold);
         idxTE = idxTE' & idxPhysicalMode;
         % sorting the solutions following mode order - 1st = Fundamental
         counter = 1;
@@ -73,7 +73,7 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,
             end
         end
         % TM Mode
-        idxTM = (ratioExEy < 1/polarization_threshold);
+        idxTM = (lumericalTETMdefinition < 1/polarization_threshold);
         idxTM = idxTM' & idxPhysicalMode;
         counter = 1;
         nr_solutionTM = [];
