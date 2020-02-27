@@ -23,7 +23,7 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = saveSolutionSnapshot(m
     % Threshold value (0.1) needs to be tested for you case.
     expression = 'ewfd.normE';
     nr_solution = 1;
-    title_str = 'mode profile';
+    title_str = 'modeProfile';
     path_str = './Results/FieldProfiles/';
     
     %% scans through varagin. -1 and +1 of for loop due to option/value pairs
@@ -44,7 +44,7 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = saveSolutionSnapshot(m
         %% extract fields
         temp = mpheval(model, expression, 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
         neff = mphglobal(model, 'ewfd.neff', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
-        title_str = [title_str '_' expression '_neff_' num2str(round(neff*1000)/1000)];
+        title_str = [title_str '_Solution' num2str(nr_solution) '_' expression '_neff_' num2str(round(neff*10000)/10000)];
         extracted_property = temp.('d1');
         cords = temp.('p');
         x = cords(1, :);

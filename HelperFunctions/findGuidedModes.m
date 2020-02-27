@@ -67,19 +67,19 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,
         nr_solutionTE = [];
         for jj = 1:length(idxTE)
             if real(idxTE(jj)) > 0
-                neffTE(counter) = neff(idxTE(jj));
+                neffTE(counter) = neff(jj);
                 nr_solutionTE = [nr_solutionTE jj];
                 counter = counter+1;
             end
         end
         % TM Mode
-        idxTM = (lumericalTETMdefinition < 1/polarization_threshold);
+        idxTM = (lumericalTETMdefinition < polarization_threshold);
         idxTM = idxTM' & idxPhysicalMode;
         counter = 1;
         nr_solutionTM = [];
         for jj = 1:length(idxTM)
             if real(idxTM(jj)) > 0
-                neffTM(counter) = neff(idxTM(jj));
+                neffTM(counter) = neff(jj);
                 nr_solutionTM = [nr_solutionTM jj];
                 counter = counter+1;
             end

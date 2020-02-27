@@ -21,15 +21,17 @@ function simulation_results = comsolEvaluation(model, simulation_parameters, mat
     
     % finding modes
     [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,...
-        'substrate', materials.Substrate,'deltaN_threshold', 0.1, 'polarization_threshold', 0.5);
+        'substrate', materials.Substrate,'deltaN_threshold', 0.05, 'polarization_threshold', 0.5);
     
     % plotting and saving modes
     for jj = 1:length(nr_solutionTM)
-        title_str = ['Row ' num2str(simulation_parameters(1).idx_row) ...
-            '__Col ' num2str(simulation_parameters(1).idx_col) ...
-            '__TMpol'];
-        saveSolutionSnapshot(model, 'expression', 'ewfd.normE', 'nr_solution', nr_solutionTM(jj),...
-            'title', title_str);
+        if ~isempty(nr_solutionTM)
+            title_str = ['Row ' num2str(simulation_parameters(1).idx_row) ...
+                '__Col ' num2str(simulation_parameters(1).idx_col) ...
+                '__TMpol'];
+            saveSolutionSnapshot(model, 'expression', 'ewfd.normE', 'nr_solution', nr_solutionTM(jj),...
+                'title', title_str);
+        end
     end
     
     % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode

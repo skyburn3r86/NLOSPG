@@ -7,11 +7,11 @@ initPaths(modelpath);
 % units. Is it nm is it microns...?
 wWGA = 600*1e-9;
 % loop1_str
-hOEO_array = linspace(10, 200, 11)*1e-9;
+hOEO_array = linspace(10, 200, 21)*1e-9;
 hWG_bot_array =  linspace(10, 200, 11)*1e-9;
 wl = 1550e-9;
 % reads refractive index of photonic waveguide as start value
-n_start = real(extractRefractiveIndex(materials.PhotonicWG, 'wavelength', wl)); 
+n_start = 3; %real(extractRefractiveIndex(materials.PhotonicWG, 'wavelength', wl)); 
 nr_modes = 4;
 
 nu = cell(length(hOEO_array), length(hWG_bot_array));
@@ -54,6 +54,36 @@ for idx_row = 1:length(hOEO_array)
 %         save(['./ComsolModels/' DumpingName '_Results.mat'], 'Results');
     end
 end
+%%
+for idx_row = 1:length(hOEO_array)
+    for idx_col = 1:length(hWG_bot_array)
+        g_0_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.g_0.value;
+        gamma_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.gamma.value;
+        Q_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.Q.value;    
+        neff_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.neff.value;    
+        
+    end
+end
+figure(4)
+surface(hWG_bot_array, hOEO_array, real(g_0_plot))
+colorbar
+xlabel('hWG bot [m]')
+ylabel('h OEO [m]')
+figure(5)
+surface(hWG_bot_array, hOEO_array, real(neff_plot))
+colorbar
+xlabel('hWG bot [m]')
+ylabel('h OEO [m]')
+figure(6)
+surface(hWG_bot_array, hOEO_array, Q_plot )
+colorbar
+xlabel('hWG bot [m]')
+ylabel('h OEO [m]')
 
-PlotLosses(losses)
-PlotEfficiciency(hOEO,OrganicA, nu)
+
+figure(7)
+title('Vacuum Cooperetivity')
+surface(hWG_bot_array, hOEO_array, real(g_0_plot).^2./1e6./193e12.*Q_plot)
+colorbar
+xlabel('hWG bot [m]')
+ylabel('h OEO [m]')
