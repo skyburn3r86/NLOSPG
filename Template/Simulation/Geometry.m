@@ -90,7 +90,7 @@ function model = Geometry(model, varargin)
         label2print = 'dom'; % Define here if you want to identifiy point 'pnt' or boundary 'bnd' or domain 'dom'
         result = mphgetselection(model.selection(['geom1_' materialNames{jj} '_' label2print])); 
         materials.(materialNames{jj}) = result.entities;
-        disp(['Layer/Priority' num2str(jj) '-' materialNames{jj} '_' label2print ': [' num2str(result.entities) ']']);
+        disp(['Layer' num2str(jj) '-' materialNames{jj} '_' label2print ': [' num2str(result.entities) ']']);
         pause(0.1);
     end
     disp('KEEP IN MIND: Higher layer number should overwrite lower layer number during Material ASSIGNMENT');

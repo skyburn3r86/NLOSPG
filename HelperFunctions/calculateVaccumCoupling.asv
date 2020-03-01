@@ -66,9 +66,9 @@ function results = calculateVaccumCoupling(model, varargin)
         'surface', 'solnum', nr_solution, 'selection', interactive_domain);    
     
     % 3. Calcualte the vaccum coupling which includes the 2-omega factor in our definition    
-    results(1).str = 'g_0';
-    results(1).unit = [interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
-    results(1).value = '[Hz]'%;interaction_energy.value/sqrt(normcoeff_optical_energy.value)^2/sqrt(normcoeff_RF.value);
+    results{1,1}.str = 'g_0';
+    results{2,1}.unit = [interaction_energy.unit{1} '*sqrt(' normcoeff_RF.unit{1} ')*' normcoeff_optical_energy.unit{1}];
+    results{3,1}.value = interaction_energy.value/sqrt(normcoeff_optical_energy.value)^2/sqrt(normcoeff_RF.value);
     
 
     % extracting group refractive index via Sum(Energy)/Sum(PowerFlow) -
@@ -82,34 +82,34 @@ function results = calculateVaccumCoupling(model, varargin)
         'surface', 'solnum', nr_solution); 
     
     % imaginary part (loss term) is neglected as 4 orders of magnitude lower
-    ng = real(3e8*mode_energy.value/mode_power_flow.value); 
+    ng = real(3e8*mode_energy.value/mode_power_flow.value);
+   
     last_colmn = size(results,2);
-    results(last_colmn+1).str = 'ng';
-    results(last_colmn+1).unit = '[]';
-    results(last_colmn+1).value = real(ng);
-    
+    results{1,last_colmn+1}.str = 'ng';
+    results{2,last_colmn+1}.unit = '[]';
+    results{3,last_colmn+1}.value = ng; ;
     neff = mphglobal(model, 'ewfd.neff', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
+
     last_colmn = size(results,2);
-    results(last_colmn+1).str = 'neff';
-    results(last_colmn+1).unit = '[]';
-    results(last_colmn+1).value = neff;
+    results{1,last_colmn+1}.str = 'neff';
+    results{2,last_colmn+1}.unit = '[]';
+    results{3,last_colmn+1}.value = neff;
     
     % calculating quality and damping rate including the which includes the 2-omega factor in our definition
     Q = ng/(2*abs(imag(neff)));
     
     last_colmn = size(results,2);
-    results(last_colmn+1).str = 'Q';
-    results(last_colmn+1).unit = '[]';
-    results(last_colmn+1).value = Q;
+    results{1,last_colmn+1}.str = 'Q';
+    results{2,last_colmn+1}.unit = '[]';
+    results{3,last_colmn+1}.value = Q;
 
     last_colmn = size(results,2);
-    results(last_colmn+1).str = 'gamma';
-    results(last_colmn+1).unit = '[Hz]';
-    results(last_colmn+1).value = mphglobal(model, 'ewfd.omega', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution)/Q;
+    results{1,last_colmn+1}.str = 'gamma';
+    results{2,last_colmn+1}.unit = '[Hz]';
+    results{3,last_colmn+1}.value = mphglobal(model, 'ewfd.omega', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution)/Q;
 
     last_colmn = size(results,2);
-    results(last_colmn+1).str = 'L_prop_';
-    results(last_colmn+1).unit = '[m]';
-    results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
-    
+    results{1,last_colmn+1}.str = 'L_prop_';
+    results{2,last_colmn+1}.unit = '[m]';
+    results{3,last_colmn+1}.value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
 end

@@ -65,6 +65,7 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,
         % sorting the solutions following mode order - 1st = Fundamental
         counter = 1;
         nr_solutionTE = [];
+        neffTE =[];
         for jj = 1:length(idxTE)
             if real(idxTE(jj)) > 0
                 neffTE(counter) = neff(jj);
@@ -72,11 +73,15 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,
                 counter = counter+1;
             end
         end
+        [~, index] = sort(neffTE,'descend');
+        neffTE = neffTE(index);
+        nr_solutionTE = nr_solutionTE(index);
         % TM Mode
         idxTM = (lumericalTETMdefinition < polarization_threshold);
         idxTM = idxTM' & idxPhysicalMode;
         counter = 1;
         nr_solutionTM = [];
+        neffTM =[];
         for jj = 1:length(idxTM)
             if real(idxTM(jj)) > 0
                 neffTM(counter) = neff(jj);
@@ -84,6 +89,9 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,
                 counter = counter+1;
             end
         end
+        [~, index] = sort(neffTM,'descend');
+        neffTM = neffTM(index);
+        nr_solutionTM = nr_solutionTM(index);
                 
         % Alternatively, modes can be found by calculating the energy
         % confinement to the photonic waveguide

@@ -7,8 +7,7 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
     %GEOMETRY Setup of Model
     %   Detailed explanation goes here
 	global library_path 
-    param_list_values = param_list.values;
-    param_list_values = param_list_values(para_list_index,:);
+    param_list_values = param_list(para_list_index).values;
     param_list_str = param_list.str;
     param_list_unit = param_list.unit;
     
@@ -105,8 +104,8 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
     for dimension = 1:length(param_list_str)
        para_name = (param_list_str{dimension});
        if any(strcmp(para_name,optionNames))
-          comsol_parameters(1).(para_name) = param_list_values(dimension)
-          comsol_parameters(2).(para_name) = param_list.unit{dimension}
+          comsol_parameters(1).(para_name) = param_list.values(1,dimension);
+          comsol_parameters(2).(para_name) = param_list.unit{dimension};
        else
           error('%s is not a recognized parameter name',para_name)
        end         
