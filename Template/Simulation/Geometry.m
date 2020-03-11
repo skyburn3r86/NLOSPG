@@ -86,6 +86,7 @@ function model = Geometry(model, varargin)
     model.component('comp1').geom('geom1').run;
           
 	% Verifing the substrate selection and prints a report in the command line  
+    if(0)
     for jj = 1:length(materialNames)
         label2print = 'dom'; % Define here if you want to identifiy point 'pnt' or boundary 'bnd' or domain 'dom'
         result = mphgetselection(model.selection(['geom1_' materialNames{jj} '_' label2print])); 
@@ -105,6 +106,7 @@ function model = Geometry(model, varargin)
         case 'pnt'
             mphgeom(model, 'geom1', 'vertexlabels', 'on');
         otherwise
+    end
     end
 end
 

@@ -3,7 +3,7 @@
 % E-Mail:           christian.haffner@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = saveSolutionSnapshot(model, varargin)
+function saveSolutionSnapshot(model, varargin)
 %Input Variables: - model = comsol model
 % VARARGIN options (extend on need)
 % 1. 'expression' - expression of the comsol results to plott and save
@@ -44,7 +44,8 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = saveSolutionSnapshot(m
         %% extract fields
         temp = mpheval(model, expression, 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
         neff = mphglobal(model, 'ewfd.neff', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
-        title_str = [title_str '_Solution' num2str(nr_solution) '_' expression '_neff_' num2str(round(neff*10000)/10000)];
+        title_str = [title_str '_neff_' num2str(real(round(neff*1000)/1000))];
+        title_str = strrep(title_str,'.','pt');
         extracted_property = temp.('d1');
         cords = temp.('p');
         x = cords(1, :);
@@ -83,6 +84,6 @@ function [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = saveSolutionSnapshot(m
         xlabel('x index [um]');
         ylabel('y index [um]');
         title(strrep(title_str,'_', ' '));
-        saveas(gcf, [path_str title_str '.jpeg']);      
-       
+        saveas(gcf, [path_str title_str '.jpeg']);  
+        close all
 end

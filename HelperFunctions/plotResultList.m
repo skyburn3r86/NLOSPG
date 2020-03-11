@@ -69,10 +69,12 @@ for list_loop = 1:length(varargin)-1
                         para{idx_para_str}.values = cell_param.values{idx_para_str};
                     end
                 end
+            case 'save'
+                save_path = varargin{list_loop+1};
         end
     end
 end
-
+clear list_loop
 %% Extracting data from list
 list_vector = ones(length(para_list.values(:,1)),1);
 for idx_parameter = 1:length(para)
@@ -83,9 +85,10 @@ for idx_parameter = 1:length(para)
     end
     list_vector = list_vector & row_vector;
 end
+clear idx_parameter;
 % % consider only values that have been found for all parameters of interest
 % list_vector = floor(sum(row_vector)/lenght(para.values)); 
-list_vector  = list_vector(1:4)
+% list_vector  = list_vector(1:4)
 counter = 1;
 for idx_row_list = 1:length(list_vector)
     if list_vector(idx_row_list)
@@ -96,82 +99,100 @@ for idx_row_list = 1:length(list_vector)
         counter = counter + 1;
     end
 end
-
+clear counter;
 % 1D plot if second argument has less then 5 values
-if length(para{2}.values) < 5
-    %1D Plot
-    % searching for all list values with para1 value
-    for jj = 1:length(para{1}.values)
-        para_1_value = para{1}.values;
-        for list_loop = 1:length(para_plot)  
-            rel_error = abs((para_1_value(jj) - para_plot(list_loop,colm_in_para_list(1)))./para_plot(list_loop,colm_in_para_list(1)));              
-            if ~isempty(find(rel_error < 1e-3))
-                if strcmp(data_FOM.str, 'max')
-                    try
-                        dummy_value = max(data_plot(list_loop), dummy_value);
-                    catch
-                        dummy_value = data_plot(list_loop);
-                    end
-                elseif strcmp(data_FOM.str, 'min')
-                    try
-                        dummy_value = min(data_plot(list_loop), dummy_value);
-                    catch
-                        dummy_value = data_plot(list_loop);
-                    end
-                end
-            end
-        end
-        dataY(jj) = dummy_value;
-    end
-    dataX = para{1}.values;
-    % generating 1D plot
-    figure;
-%     'to do' add linear plot
-    plot(dataX, dataY);
-    title('');
-    xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',''));
-    ylabel(strrep([ str_data ' ' str_unit],'_',''));
-else
-    %2D plot for jj = 1:length(para{1}.values)
-    for jj = 1:length(para{1}.values)
-        para_1_value = para{1}.values;
-        for kk = 1:length(para{2}.values)
-            para_2_value = para{2}.values;
-            for list_loop = 1:length(para_plot)
-                current_value_plot_list = para_plot(list_loop,colm_in_para_list(1));
-                % search list for parameters 1 and 2 that meet the
-                % para_1_values and para_2_values simultanousely
-                rel_error_para1 = abs((para_1_value(jj) - current_value_plot_list)./current_value_plot_list);
-                rel_error_para2 = abs((para_2_value(jj) -current_value_plot_list)./current_value_plot_list);
-                if ~isempty(find(rel_error_para1 < 1e-3)) && ~isempty(find(rel_error_para2 < 1e-3))                    
+if length(para) == 1
+        % searching for all list values callculated for para1.value and para2.value
+        for idx_para1 = 1:length(para{1}.values)
+            para_1_value = para{1}.values(idx_para1);
+            dummy_value = [];
+            for idx_list_loop = 1:length(para_plot)
+                rel_error = abs((para_1_value - para_plot(idx_list_loop,colm_in_para_list(1)))./para_plot(idx_list_loop,colm_in_para_list(1)));
+                if ~isempty(find(rel_error < 1e-3))
                     if strcmp(data_FOM.str, 'max')
-                        try
-                            dummy_value = max(data_plot(list_loop), dummy_value);
-                        catch
-                            dummy_value = data_plot(list_loop);
+                        if ~isempty(dummy_value)
+                            dummy_value = max(data_plot(idx_list_loop), dummy_value);
+                        else
+                            dummy_value = data_plot(idx_list_loop);
                         end
                     elseif strcmp(data_FOM.str, 'min')
-                        try
-                            dummy_value = min(data_plot(list_loop), dummy_value);
-                        catch
-                            dummy_value = data_plot(list_loop);
+                        if ~isempty(dummy_value)
+                            dummy_value = min(data_plot(idx_list_loop), dummy_value);
+                        else
+                            dummy_value = data_plot(idx_list_loop);
                         end
                     end
                 end
             end
-        dataY(jj,kk) = dummy_value;
+            dataY(idx_para1) = dummy_value;
+        end
+        dataX = para{1}.values;
+        % generating 1D plot
+        figure;
+        %     'to do' add linear plot
+        plot(dataX, dataY);
+        title(strrep([ str_data ' ' str_unit],'_',' '));
+        xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
+        ylabel(strrep([ str_data ' ' str_unit],'_',' '));
+        if exist('save_path')
+            saveas(gcf, [save_path strrep([ str_data ' ' str_unit],'_',' ') '.jpeg']);
+            saveas(gcf, [save_path strrep([ str_data ' ' str_unit],'_',' ') '.fig']);
+        end
+else
+    %2D plot 
+    for idx_para1 = 1:length(para{1}.values)
+        para_1_value = para{1}.values(idx_para1);
+        for idx_para2 = 1:length(para{2}.values)
+            para_2_value = para{2}.values(idx_para2);
+            dummy_value = [];
+            for idx_list_loop = 1:length(para_plot)
+                current_value_plot_list1 = para_plot(idx_list_loop,colm_in_para_list(1));
+                current_value_plot_list2 = para_plot(idx_list_loop,colm_in_para_list(2));
+                % search list for parameters 1 and 2 that meet the
+                % para_1_values and para_2_values simultanousely
+                rel_error_para1 = abs((para_1_value - current_value_plot_list1)./current_value_plot_list1);
+                rel_error_para2 = abs((para_2_value -current_value_plot_list2)./current_value_plot_list2);
+                if ~isempty(find(rel_error_para1 < 1e-3)) && ~isempty(find(rel_error_para2 < 1e-3))                    
+                    if strcmp(data_FOM.str, 'max')
+                        if ~isempty(dummy_value)
+                            dummy_value = max(data_plot(idx_list_loop), dummy_value);
+                        else
+                            dummy_value = data_plot(idx_list_loop);
+                        end
+                    elseif strcmp(data_FOM.str, 'min')
+                        if ~isempty(dummy_value)
+                            dummy_value = min(data_plot(idx_list_loop), dummy_value);
+                        else
+                            dummy_value = data_plot(idx_list_loop);
+                        end
+                    end
+                end
+            end
+        dataZ(idx_para2,idx_para1) = dummy_value;
         end
     end
     dataX = para{1}.values;
     dataY = para{2}.values;
     % generating 1D plot
     figure
-%     'to do' add linear plot
-    surface(dataX, dataY)
-    title('')
-    xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',''));
-    xlabel(strrep([ para_list.str{colm_in_para_list(2)} ' ' para_list.unit{colm_in_para_list(2)} ],'_',''));
-    clabel(strrep([ str_data ' ' str_unit],'_',''))
+    surface(dataX, dataY, real(dataZ));
+    colorbar;
+    save_str = [strrep([ str_data ' ' str_unit],'_',' ')];
+    for jj = 3:length(para)
+        if length(para{jj}.values) > 1
+        save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) '-' num2str(max(para{jj}.values)) ']'];
+        else
+        save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) ']'];
+        end
+    end
+    title(save_str);
+    xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
+    ylabel(strrep([ para_list.str{colm_in_para_list(2)} ' ' para_list.unit{colm_in_para_list(2)} ],'_',' '));
+    if exist('save_path')
+        save_str = [save_path strrep(save_str,'.','pt')];
+        saveas(gcf, [save_str '.jpeg']);  
+        saveas(gcf, [save_str '.fig']); 
+    end
 end
         
 end

@@ -43,7 +43,6 @@ function simulation_results = comsolEvaluation(model, simulation_parameters, mat
                 'title', title_str);
         end
     end
-    
     % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode
     simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEO', 'nr_solution', nr_solutionTM(1));
          

@@ -8,11 +8,14 @@ initPaths(modelpath);
 para_sweep{1}.values = linspace(10, 200, 21)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(100, 250, 21)*1e-9;
+para_sweep{2}.values = linspace(100, 250, 7)*1e-9;
 para_sweep{2}.str = 'hWG_bot';
 para_sweep{2}.unit = '[m]';
-para_sweep{3}.values = linspace(1550, 1900, 3)*1e-9;
+para_sweep{3}.values = linspace(1550, 1900, 2)*1e-9;
 para_sweep{3}.str = 'wl';
+para_sweep{3}.unit = '[m]';
+para_sweep{3}.values = linspace(300, 900, 3)*1e-9;
+para_sweep{3}.str = 'wWG';
 para_sweep{3}.unit = '[m]';
 
 % maping N-dimensional parameter sweep onto linear list
@@ -38,12 +41,12 @@ for idx_param_list = 1:size(param_list.values,1)
     end
     
     % Save & Evaluate
-    if 1
         save_str = strrep(param_list.print{idx_param_list},'>_<', '');
         save_str = strrep(save_str,'_','');
         save_str = strrep(save_str,'[','');
         save_str = strrep(save_str,']','');
         save_str = strrep(save_str,' ','_');
+    if 1
         mphsave(comsol_model, ['./ComsolModels/' save_str '.mph']);
     end
     sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str);
@@ -58,45 +61,45 @@ if 1
     save(['./Results/' workspace_save_str '_Results.mat']);
 end
 
-plotResultList(sim_results, param_list,'data_str', 'g_0',...
-    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1550e-9},'data_FOM', 'max');
-
 %% Data Evaluation
-for idx_row = 1:length(hOEO_array)
-    for idx_col = 1:length(hWG_bot_array)
-        g_0_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.g_0.value;
-        gamma_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.gamma.value;
-        Q_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.Q.value;    
-        neff_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.neff.value; 
-        ng_plot(idx_row,idx_col) = sim_results{idx_row,idx_col}.ng.value;              
-    end
-end
-
 close all
-plotResultList(result_List, para_list, '')  
+% availabe simulatin results
+available_sim_results = [];
+for jj = 1:length(sim_results{1})
+    available_sim_results = [available_sim_results '  /  ' sim_results{1}(jj).str];
+end
+display(['Available simulation results:' available_sim_results]);
 
-figure(5)
-surface(hWG_bot_array, hOEO_array, real(neff_plot))
-colorbar
-xlabel('hWG bot [m]')
-ylabel('h OEO [m]')
-figure(6)
-surface(hWG_bot_array, hOEO_array, Q_plot )
-colorbar
-xlabel('hWG bot [m]')
-ylabel('h OEO [m]')
+% availabe simulatin results
+available_param = [];
+for jj = 1:length(param_list.str)
+    available_param = [available_param '  /  ' param_list.str{jj}];
+end
+display(['Parameters:' available_param]);
 
+%%
+plotResultList(sim_results, param_list,'data_str', 'g_0',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1550e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
 
-figure(7)
-title('n_{group} [m]')
-surface(hWG_bot_array, hOEO_array, ng_plot)
-colorbar
-xlabel('hWG bot [m]')
-ylabel('h OEO [m]')
+plotResultList(sim_results, param_list,'data_str', 'g_0',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1900e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+%%
+plotResultList(sim_results, param_list,'data_str', 'gamma',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1550e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
 
-figure(8)
-title('Vacuum Cooperetivity')
-surface(hWG_bot_array, hOEO_array, real(g_0_plot).^2./1e6./193e12.*Q_plot)
-colorbar
-xlabel('hWG bot [m]')
-ylabel('h OEO [m]')
+plotResultList(sim_results, param_list,'data_str', 'gamma',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1900e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+
+%%
+plotResultList(sim_results, param_list,'data_str', 'Q', ...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1550e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+
+%%
+plotResultList(sim_results, param_list,'data_str', 'Q', ...
+    'para_str', {'wl', para_sweep{1}.str}, 'para_values', {[], []},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);

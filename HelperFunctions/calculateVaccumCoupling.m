@@ -67,8 +67,9 @@ function results = calculateVaccumCoupling(model, varargin)
     
     % 3. Calcualte the vaccum coupling which includes the 2-omega factor in our definition    
     results(1).str = 'g_0';
-    results(1).unit = [interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
-    results(1).value = '[Hz]'%;interaction_energy.value/sqrt(normcoeff_optical_energy.value)^2/sqrt(normcoeff_RF.value);
+    results(1).unit = '[2\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
+    g_0 = interaction_energy.value/sqrt(normcoeff_optical_energy.value)^2/sqrt(normcoeff_RF.value);
+    results(1).value = g_0 ;
     
 
     % extracting group refractive index via Sum(Energy)/Sum(PowerFlow) -
@@ -103,13 +104,20 @@ function results = calculateVaccumCoupling(model, varargin)
     results(last_colmn+1).value = Q;
 
     last_colmn = size(results,2);
+    gamma = mphglobal(model, 'ewfd.omega', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution)/Q;
     results(last_colmn+1).str = 'gamma';
-    results(last_colmn+1).unit = '[Hz]';
-    results(last_colmn+1).value = mphglobal(model, 'ewfd.omega', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution)/Q;
+    results(last_colmn+1).unit = '[2\pi Hz]';
+    results(last_colmn+1).value = gamma;
 
     last_colmn = size(results,2);
     results(last_colmn+1).str = 'L_prop_';
     results(last_colmn+1).unit = '[m]';
+    results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
+        
+    last_colmn = size(results,2);
+    C = 4.*g_0^2/gamma;
+    results(last_colmn+1).str = 'C_reduced';
+    results(last_colmn+1).unit = '[\gamma_{RF} = 2\pi 1MHz]';
     results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
     
 end
