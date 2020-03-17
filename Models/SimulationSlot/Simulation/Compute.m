@@ -7,11 +7,10 @@ function [model] = Compute(model,varargin)
 %COMPUTE Starts the Computation of the Model in this function. Takes the
 %model as argument and can be given the 'mat' as parameter. Si and SiNx
 %implemented
-
+% Create Study
     options = struct(...
             'mat', 'Si', ...
-            'wl', {[770, 775, 780, 1545, 1550, 1555], '[nm]'});
-
+            'wl', {[1305, 1310, 1315, 2615, 2620, 2625], '[nm]'});
     optionNames=fieldnames(options);
 
     nArgs = length(varargin);
@@ -27,7 +26,7 @@ function [model] = Compute(model,varargin)
                 options(2).(inpName) = pair{2}{2};
            else
                options(1).(inpName) = pair{2};
-               options(2).(inpName) = pair{2}; 
+               options(2).(inpName) = pair{2};
            end
 
        else
@@ -36,7 +35,7 @@ function [model] = Compute(model,varargin)
     end
 
     % Create Study
-    model.study.create('std1'); 
+    model.study.create('std1');
     % Mode Analysis
     model.study('std1').create('mode', 'ModeAnalysis');
     model.study('std1').feature('mode').set('ngen', '5');
@@ -49,7 +48,7 @@ function [model] = Compute(model,varargin)
         model.study('std1').feature('mode').set('shift', '2.0');
     end
     % Generate the string of relevant wavelengths
-    lambdas = ''; 
+    lambdas = '';
     for ii = 1:length(options(1).('wl'))
         lambdas = [lambdas num2str(options(1).('wl')(ii)) ', '];
     end

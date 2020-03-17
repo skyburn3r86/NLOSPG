@@ -45,10 +45,10 @@ function refractive_index = extractRefractiveIndex(materialName, varargin)
     fileID = fclose(fileID);
 
     if ~isempty(strfind(materialName, 'eps'))
-        optical_property = interp1(dataMaterial{1} ,(dataMaterial{2} +i*dataMaterial{3}),wavelength*1e9, 'linear','extrap');
+        optical_property = interp1(dataMaterial{1} ,(dataMaterial{2} +1i*dataMaterial{3}),wavelength*1e9, 'linear','extrap');
         refractive_index = sqrt(optical_property);
     elseif ~isempty(strfind(materialName, 'nk'))
-        refractive_index = interp1(dataMaterial{1} ,(dataMaterial{2} +i*dataMaterial{3}),wavelength*1e9, 'linear','extrap');
+        refractive_index = interp1(dataMaterial{1} ,(dataMaterial{2} +1i*dataMaterial{3}),wavelength*1e9, 'linear','extrap');
     else
         refractive_index = -1;
     end

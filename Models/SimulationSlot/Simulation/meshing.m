@@ -3,84 +3,87 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function [model] = meshing(model, Selection, varargin)
+function [model] = meshing(model, varargin)
 %MESH Meshes the structure. Can be given arguments: 'mat' Si, SiNx and
 %'mesh[mat]' for the meshing parameters of the material, 'mesh[mat]x' and
 %'mesh[mat]y' for anisotropic meshing (x, y=1 will be isotropic)
-    options = struct(...
-        'mat', 'Si',...
-        'meshAu', {50, '[nm]'},...
-        'meshAux', {1, ''},...
-        'meshAuy', {5, ''}, ...
-        'meshSiNx', {'wl/(2.0*20)', ''},...
-        'meshSiNxx', {1, ''},...
-        'meshSiNxy', {1, ''}, ...
-        'meshSi', {'wl/(3.4*20)', ''},...
-        'meshSix', {1, ''},...
-        'meshSiy', {1, ''}, ...
-        'meshSiO2', {'wl/(1.45*10)', ''},...
-        'meshSiO2x', {1, ''},...
-        'meshSiO2y', {1, ''}, ...
-        'meshAl2O3', {'wl/(1.78*20)', ''},...
-        'meshAl2O3x', {1, ''},...
-        'meshAl2O3y', {1, ''}, ...
-        'meshOrganics', {'wl/(1.78*20)', '[nm]'},...
-        'meshOrganicsx', {1, ''},...
-        'meshOrganicsy', {1, ''},...,
-        'meshAir', {'wl/10', ''},...
-        'meshAirx', {1, ''}, ...
-        'meshAiry', {1, ''});
+    %MESH Meshes the structure. Can be given arguments: Materials
+    %'mesh[mat]' for the meshing parameters of the material, 'mesh[mat]x' and
+    %'mesh[mat]y' for anisotropic meshing (x, y=1 will be isotropic)
+    % Define Material Parameters
+    materials = varargin{1};
+    materialNames =fieldnames(materials);
 
-    optionNames=fieldnames(options);
+    % A good starting point for a mesh shize depend on the character of the
+    % mode. A plasmonic mesh should be finder then a photonic to resolve
+    % the exponential decay in the metal (Screening length ie 50nm for 1550nm)
+    % A rule of thumb for photonic mesh size is wavelength (wl) over 8
+    % times the refractive index for photonics, while plasmonics should be
+    % on the order of < ScreeningLength/5. In doubt perform a mesh analysis study by
+    % sweeping the mesh size and tracking the solution of the effective
+    % refractive index to see convergence of the solution for reduced mesh
+    % size within the comsol model saved by mphsave(model, 'Convergence
+    % Test')
 
-    nArgs = length(varargin);
-    if round(nArgs/2)~=nArgs/2
-       error('Arguments needs propertyName/propertyValue pairs')
-    end
-
-    for pair = reshape(varargin,2,[])
-        inpName = pair{1};
-       if any(strcmp(inpName,optionNames))
-           if isa(pair{2}, 'cell')
-                options(1).(inpName) = pair{2}{1};
-                options(2).(inpName) = pair{2}{2};
-           else
-               options(1).(inpName) = pair{2};
-               options(2).(inpName) = pair{2};
-           end
-
-       else
-          error('%s is not a recognized parameter name',inpName)
-       end
-    end
-    selectionNames = fieldnames(Selection);
-    selectionNames = selectionNames([find(strcmp(selectionNames, 'Au')), find(strcmp(selectionNames, 'Si')),find(strcmp(selectionNames, 'SiNx')), find(strcmp(selectionNames, 'Al2O3')), find(strcmp(selectionNames, 'Organics')), find(strcmp(selectionNames, 'SiO2')), find(strcmp(selectionNames, 'Air'))]);
-    counter = 1;
     model.component('comp1').mesh.create('mesh1');
-    for ii = 1:length(selectionNames)
-        name = selectionNames{ii};
-        selection = Selection.(name);
-        xscale = options.(['mesh' name 'x']);
-        yscale = options.(['mesh' name 'y']);
-        if isa(options(1).(['mesh' name]), 'double') || isa(options(1).(['mesh' name]), 'float') || isa(options(1).(['mesh' name]), 'int')
-            smax = [num2str(options(1).(['mesh' name])) options(2).(['mesh' name])];
+    selected_domains = [];
+    % reverse sweep direction to give high priority of meshing for later material
+    for jj = length(materialNames):-1:1
+        % checks if material properties are defined by txt file
+        if ~isempty(strfind(materials.(materialNames{jj}), '.txt'))
+            % check if plasmonic waveguide
+            if ~isempty(strfind(lower(materialNames{jj}), 'metal'))
+                meshsize = 'wl/plasmonic_mesh'; % plasmonic_mesh is defined in ModelSetup_Parameters
+                % reduce simulation time by utilzing scaling factors. For
+                % instance, hybrid waveguide with metal extending towards
+                % inifity for y --> yscale < 1 increases meshsize;
+                xscale = 1;
+                yscale = 1;
+            elseif ~isempty(strfind(lower(materialNames{jj}), 'electrodes'))
+                meshsize = 'wl/10';
+                xscale = 1;
+                yscale = 1;
+            else % case of photonic waveguide/components
+                % open the txt file of the material to extract the data and
+                % interpolate the refractive index
+                refractive_index = real(extractRefractiveIndex(materials.(materialNames{jj}), 'model', model));
+                meshsize = ['wl/' num2str(refractive_index) '/8'];
+                xscale = 1;
+                yscale = 1;
+            end
         else
-            smax = [options(1).(['mesh' name]) options(2).(['mesh' name])];
+            refractive_index = 1;       % For the Moment exclusively for Air. 
+            meshsize = ['wl/' num2str(refractive_index) '/8'];
+            xscale = 1; 
+            yscale = 1; 
         end
+            
+        % adding triangular mesh
+        model.component('comp1').mesh('mesh1').create(['ftri', materialNames{jj}], 'FreeTri');
+        model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).label(['ftri', materialNames{jj}]);
+        model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).set('xscale', xscale);
+        model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).set('yscale', yscale);
+        model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).selection.geom('geom1', 2);
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).create('size1', 'Size');
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('hauto', 1);
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('custom', 'on');
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('hmax', meshsize);
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('hmaxactive', true);
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('hmin', 3.86E-11);
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).feature('size1').set('hminactive', false);
 
-        model.component('comp1').mesh('mesh1').create(['ftri', num2str(counter)], 'FreeTri');
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).set('xscale', xscale);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).set('yscale', yscale);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).selection.geom('geom1', 2);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).selection.set(selection);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).create('size1', 'Size');
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).feature('size1').set('hauto', 1);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).feature('size1').set('custom', 'on');
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).feature('size1').set('hmax', smax);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).feature('size1').set('hmaxactive', true);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).feature('size1').set('hmin', 3.86E-11);
-        model.component('comp1').mesh('mesh1').feature(['ftri', num2str(counter)]).feature('size1').set('hminactive', false);
-        counter = counter + 1;
+        % adding domains to mesh materialNames{jj}
+        objects = mphgetselection(model.selection(['geom1_' materialNames{jj} '_dom']));
+        mesh_selection = [];
+        % for-loop scans if the current domain has been asigned
+        % previously.
+        for ii = 1:length(objects.entities)
+            if isempty(find(selected_domains == objects.entities(ii)))
+                mesh_selection = [mesh_selection objects.entities(ii)];
+                selected_domains = [selected_domains objects.entities(ii)];
+            end
+        end
+        model.component('comp1').mesh('mesh1').feature(['ftri',  materialNames{jj}]).selection.set(mesh_selection);
     end
     model.component('comp1').mesh('mesh1').run;
 end

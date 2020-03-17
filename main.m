@@ -1,65 +1,101 @@
 modelpath = pwd;
 % path for global variabls, material data, etc
-global library_path 
-cd('../');
-addpath([library_path '\DataIn'])
-cd('DataIn');
-library_path = pwd;
-cd(modelpath)
-addpath([modelpath '\Evaluation'])
-addpath([modelpath '\Plotting'])
-addpath([modelpath '\QuantumEvaluation'])
-addpath([modelpath '\Simulation'])
+initPaths('Models/SimulationSlot');
 
-N = 25;
-wWGA = 600;
-hWGA_array = [220, 260, 340, 400, 500];
-hOrganicA = linspace(200, 300, 3); 
-material = 'Si';            %Si or SiNx
+para_sweep{1}.values = linspace(10, 200, 21)*1e-9;
+para_sweep{1}.str = 'hOEO';
+para_sweep{1}.unit = '[m]';
+para_sweep{2}.values = linspace(50, 250, 9)*1e-9;
+para_sweep{2}.str = 'dSlot';
+para_sweep{2}.unit = '[m]';
+para_sweep{3}.values = linspace(1550, 1900, 2)*1e-9;
+para_sweep{3}.str = 'wl';
+para_sweep{3}.unit = '[m]';
+para_sweep{3}.values = linspace(300, 900, 3)*1e-9;
+para_sweep{3}.str = 'wWG';
+para_sweep{3}.unit = '[m]';
 
-nu = cell(length(hWGA_array), length(hOrganicA));
-losses = cell(length(hWGA_array), length(hOrganicA));
-
-for ii = 1:length(hWGA_array)
-    for kk = 1:length(hOrganicA)
-        hOrganic = hOrganicA(kk);
-        hWG = hWGA_array(ii);
-        DumpingName = [num2str(hOrganic) 'nm_' num2str(hWG) 'nm_'];
-        % Simulate
-        % ModelSetup_Parameters - init Model and defines parameters
-        [comsol_model, materials] = ModelSetup_Parameters('Nl', {N, ' '}, 'hWG_top', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
-        % DispersionRelation - what is the purpose of this? Shouldnt we
-        % include that into our material libary? 
-%         [Simulation, refr] = DispersionRelation(Simulation, 'plot', false); 
-        % Builiding the geometry based on ModelSetup_Parameters
-        comsol_model = Geometry(comsol_model, materials);
-        
-%         [Simulation, Selections, BoundarySel] = Geometry(Simulation, 'mat', {0, material}, 'Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hBuffer', {0, '[nm]'});
-        [comsol_model] = Materials(comsol_model, materials); 
-        [comsol_model] = meshing(comsol_model, Selections, 'mat', material); 
-        [comsol_model] = Physics(comsol_model, BoundarySel, Selections); 
-        try
-            [comsol_model] = Compute(comsol_model, 'mat', material); 
-        catch
-            disp(['Error at Simulating' DumpingName])
-        end
-
-        % Save & Evaluate
-        mphsave(comsol_model, ['./ComsolModels/' DumpingName '_Model.mph']);
-        [Results] = Evaluation(comsol_model, 'Nl', {N, ' '}, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
-        save(['./ComsolModels/' DumpingName '_Results.mat'], 'Results');
-        %dumpStruct(Results, ['./Data/200109_' DumpingName '_ResultsDump.csv']);
-        try
-            PlotDispersionRelation(Results, 'fileName', DumpingName);
-        catch
-           disp(['Error at Plotting' DumpingName])
-           continue
-        end
-
-        nu{ii, kk} = QuantumEvaluation(comsol_model, 'wWG', {wWG, '[nm]'}, 'hWG', {hWG, '[nm]'}, 'hOrganic', {hOrganic, '[nm]'}, 'hBuffer', {0, '[nm]'});
-        losses{ii, kk} = AssignResults(Results, hWG, hOrganic);
+[param_list] = combParameterSweep(para_sweep);
+for idx_param_list = 1:size(param_list.values,1)
+    % displays current run
+    disp(['Current run:' num2str(round(idx_param_list/size(param_list.values,1)*100,100)) '%  --- '...
+        param_list.print{idx_param_list}]);    
+    
+    % ModelSetup_Parameters - init Model and defines parameters    
+    [comsol_model, materials, sim_parameters] = ModelSetup_Parameters(param_list, idx_param_list,...
+        'n_start', {3.4, ' '});
+    % setup model
+    comsol_model = Geometry(comsol_model, materials);
+    comsol_model = Materials(comsol_model, materials);
+    comsol_model = meshing(comsol_model, materials);
+    comsol_model = Physics(comsol_model, materials);
+    try
+        % calculate compute
+        [comsol_model] = Compute(comsol_model);
+    catch
+        disp(['Error at Simulating' param_list.print{idx_param_list}])
+        continue
     end
+    
+    % Save & Evaluate
+    save_str = strrep(param_list.print{idx_param_list},'>_<', '');
+    save_str = strrep(save_str,'_','');
+    save_str = strrep(save_str,'[','');
+    save_str = strrep(save_str,']','');
+    save_str = strrep(save_str,' ','_');
+    if 1
+        mphsave(comsol_model, ['./ComsolModels/' save_str '.mph']);
+    end
+    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str);
+end
+if 1
+    % to do save as h5 file
+    workspace_save_str = '__SIS__';
+    for dimension = 1:length(para_sweep)
+        workspace_save_str = [workspace_save_str strrep(para_sweep{dimension}.str,'_','') '_'];
+    end
+    save(['./Results/' workspace_save_str '_Results.mat']);
 end
 
-PlotLosses(losses)
-PlotEfficiciency(hWGA_array,OrganicA, nu)
+%% Data Evaluation
+close all
+% availabe simulatin results
+available_sim_results = [];
+for jj = 1:length(sim_results{1})
+    available_sim_results = [available_sim_results '  /  ' sim_results{1}(jj).str];
+end
+display(['Available simulation results:' available_sim_results]);
+
+% availabe simulatin results
+available_param = [];
+for jj = 1:length(param_list.str)
+    available_param = [available_param '  /  ' param_list.str{jj}];
+end
+display(['Parameters:' available_param]);
+
+%%
+plotResultList(sim_results, param_list,'data_str', 'g_0',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1550e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+
+plotResultList(sim_results, param_list,'data_str', 'g_0',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1900e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+%%
+plotResultList(sim_results, param_list,'data_str', 'gamma',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1550e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+
+plotResultList(sim_results, param_list,'data_str', 'gamma',...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1900e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+
+%%
+plotResultList(sim_results, param_list,'data_str', 'Q', ...
+    'para_str', {para_sweep{1}.str, 'hWG_bot' ,'wl'}, 'para_values', {[], [] ,1550e-9},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);
+
+%%
+plotResultList(sim_results, param_list,'data_str', 'Q', ...
+    'para_str', {'wl', para_sweep{1}.str}, 'para_values', {[], []},...
+    'data_FOM', 'max', 'save', ['./Results/' workspace_save_str]);

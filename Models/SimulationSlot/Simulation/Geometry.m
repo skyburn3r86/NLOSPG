@@ -6,63 +6,17 @@
 function [model, Selections, BoundarySelection] = Geometry(model, varargin)
 %GEOMETRY Generates Geometry of Initialized Parameters (Setup)
     % Get Arguments
-    Selections = struct(...
-        'SiO2', [], ...
-        'SiNx', [], ...
-        'Au', [], ...
-        'Si', [], ...
-        'Organics', [],...
-        'Al2O3', [], ...
-        'Air', []);
-
-    options = struct(...
-        'wSim', {2.5, '[um]'},...
-        'hSubstrate', {2, '[um]'},...
-        'hWG', {340, '[nm]'},...
-        'wWG', {500, '[nm]'},...
-        'hOrganic', {200, '[nm]'},...
-        'hBuffer', {200, '[nm]'},...
-        'hContact', {50, '[nm]'},...
-        'hAir', {500, '[nm]'},...s
-        'r33', {137, '[pm/V]'}, ...
-        'lmin', {1100, '[nm]'}, ...
-        'lmax', {2300, '[nm]'}, ...
-        'Nl', {25, ' '}, ...
-        'mat', {'', 'Si'}, ...
-        'wl', {1550, '[nm]'}, ...
-        'hRidge', {20, '[nm]'}, ...
-        'dSlot', {100, '[nm]'});
-
-    optionNames=fieldnames(options);
-
-    nArgs = length(varargin);
-    if round(nArgs/2)~=nArgs/2
-       error('Arguments needs propertyName/propertyValue pairs')
-    end
-
-    for pair = reshape(varargin,2,[])
-        inpName = pair{1};
-       if any(strcmp(inpName,optionNames))
-          options(1).(inpName) = pair{2}{1};
-          options(2).(inpName) = pair{2}{2};
-       else
-          error('%s is not a recognized parameter name',inpName)
-       end
-    end
-
-    for ii = 1:length(optionNames)
-        inpName = optionNames{ii};
-        if strcmp(options(2).(inpName), '[nm]')
-            options(1).(inpName) = options(1).(inpName)*1e-9;
-        elseif strcmp(options(2).(inpName), '[um]')
-            options(1).(inpName) = options(1).(inpName)*1e-6;
-        end
-    end
+    materials = varargin{1};
+    materialNames=fieldnames(materials);
+    % ***************** Create Geometry
     model.component('comp1').geom.create('geom1', 2);
-    materialNames = fieldnames(Selections); 
+
+    % generting the selction containers for tracking materials of geometry
+    % 1st entry lowest priority; last layer highest priority.
+    % Higher priority: Material assignments of lower priority layers are overwritten
     for jj = 1:length(materialNames)
         selection_container_dummy = model.component('comp1').geom('geom1').selection.create(materialNames{jj}, 'CumulativeSelection');
-        selection_container_dummy.label(materialNames{jj});
+        selection_container_dummy.label(materialNames(jj));
     end
 
     % ***************** Create Geometry
@@ -74,24 +28,28 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('Thermal Oxide');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hSubstrate'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' '0'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', 'SiO2');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{1});
     counter = counter + 1;
 
-    if isempty(Selections.('SiO2'))
-        Selections.('SiO2') = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; -eps options(1).('hSubstrate')+eps], 'domain');
+    % Parse parameter
+    hRidge = char(model.param.get('hRidge'));
+    if contains(hRidge, '[um]')
+        hRidge = str2num(erase(hRidge, ' [um]'));
+    elseif contains(hRidge, '[nm]')
+        hRidge = str2num(erase(hRidge, ' [nm]'));
+    elseif contains(hRidge, '[m]')
+        hRidge = str2num(erase(hRidge, ' [m]'));
     else
-        old = Selections.('SiO2');
-        new = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; -eps options(1).('hSubstrate')+eps], 'domain');
-        Selections.('SiO2') = [old, new];
+        error('hRidge: Unit not recognized')
     end
 
     % WG - base
-    if options(1).('hRidge')~= 0
+    if hRidge~= 0
         model.component('comp1').geom('geom1').create(['r' num2str(counter)], 'Rectangle');
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('BaseWaveguide');
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hRidge'});
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate'});
-        model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', options(2).('mat'));
+        model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
         counter = counter + 1;
     end
     
@@ -100,7 +58,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('WaveguideLRidge');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wWG' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim-dSlot)/2-wWG' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', options(2).('mat'));
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
     counter = counter + 1;
 
     % WG Right Ridge
@@ -108,7 +66,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('WaveguideRRidge');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wWG' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim+dSlot)/2' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', options(2).('mat'));
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
     counter = counter + 1;
 
     % Organics, middle
@@ -116,7 +74,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('OrganicsSlot');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'dSlot' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim-dSlot)/2' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', 'Organics');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{3});
     counter = counter + 1;
 
     % Organics top
@@ -124,7 +82,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('OrganicsTop');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hOrganic'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hRidge+hWG'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', 'Organics');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{3});
     counter = counter + 1;
 
     % Cladding L
@@ -132,7 +90,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('CladdingL');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'(wSim-(2*wWG + dSlot))/2' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', 'SiO2');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{1});
     counter = counter + 1;
 
     % Cladding R
@@ -140,7 +98,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('CladdingR');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'(wSim-(2*wWG + dSlot))/2' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim+(2*wWG + dSlot))/2' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', 'SiO2');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{1});
     counter = counter + 1;
 
     % Air Buffer
@@ -148,11 +106,22 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('AirTop');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hAir'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hRidge+hWG+hOrganic'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', 'Air');
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{7});
     counter = counter + 1;
 
+    % Parse parameter
+    hBuffer = char(model.param.get('hBuffer'));
+    if contains(hBuffer, '[um]')
+        hBuffer = str2num(erase(hBuffer, ' [um]'));
+    elseif contains(hBuffer, '[nm]')
+        hBuffer = str2num(erase(hBuffer, ' [nm]'));
+    elseif contains(hBuffer, '[m]')
+        hBuffer = str2num(erase(hBuffer, ' [m]'));
+    else
+        error('hBuffer: Unit not recognized')
+    end
     % Buffer
-    if ~(options(1).('hBuffer') == 0)
+    if ~(hBuffer == 0)
         model.component('comp1').geom('geom1').create(['r' num2str(counter)], 'Rectangle');
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('Buffer Oxide');
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hBuffer'});
@@ -161,19 +130,31 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     end
 
     outerBND = []; 
+    % generating geometry
     model.component('comp1').geom('geom1').run;
-    for ii = 1:length(materialNames)
-        temp = mphgetselection(model.selection(['geom1_' materialNames{ii} '_dom'])); 
-        Selections.(materialNames{ii}) = temp.entities; 
-        temp = mphgetselection(model.selection(['geom1_' materialNames{ii} '_bnd'])); 
-        outerBND = setxor(outerBND, temp.entities); 
-    end
 
-    Graphene = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')-eps options(1).('hSubstrate')+eps], 'boundary');
-    TopContact = mphselectbox(model, 'geom1', [-eps options(1).('wSim')+eps; options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')-eps options(1).('hSubstrate')+options(1).('hOrganic')+options(1).('hBuffer')+eps], 'boundary');
-    BoundarySelection = struct(...
-        'OuterBoundaries', outerBND, ...
-        'Graphene', Graphene,...
-        'TopContact', TopContact);
+	% Verifing the substrate selection and prints a report in the command line
+    if(0)
+        for jj = 1:length(materialNames)
+            label2print = 'dom'; % Define here if you want to identifiy point 'pnt' or boundary 'bnd' or domain 'dom'
+            result = mphgetselection(model.selection(['geom1_' materialNames{jj} '_' label2print]));
+            materials.(materialNames{jj}) = result.entities;
+            disp(['Layer' num2str(jj) '-' materialNames{jj} '_' label2print ': [' num2str(result.entities) ']']);
+            pause(0.1);
+        end
+        disp('KEEP IN MIND: Higher layer number should overwrite lower layer number during Material ASSIGNMENT');
+        % generates matlab plot of geometry and the domain, boundary, point
+        % labels
+        figure(1)
+        switch label2print
+            case 'dom'
+                mphgeom(model, 'geom1', 'Facelabels', 'on');
+            case 'bnd'
+                mphgeom(model, 'geom1', 'Edgelabels', 'on');
+            case 'pnt'
+                mphgeom(model, 'geom1', 'vertexlabels', 'on');
+            otherwise
+        end
+    end
 end
 

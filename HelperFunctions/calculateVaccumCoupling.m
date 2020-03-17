@@ -25,7 +25,7 @@ function results = calculateVaccumCoupling(model, varargin)
     interactive_domain = 1; 
     
     %% scans through varagin. -1 and +1 of for loop due to option/value pairs
-    for ii = 1:length(varargin)-1
+    for ii = 1:2:length(varargin)-1
         switch varargin{ii}
             case 'type'
                 type = varargin{ii+1};
@@ -35,89 +35,155 @@ function results = calculateVaccumCoupling(model, varargin)
                 active_domain = varargin{ii+1};
                 objects = mphgetselection(model.selection(['geom1_' active_domain '_dom']));
                 interactive_domain = objects.entities;
+            case 'OuterSolNums'
+                OuterSolNums = varargin{ii+1};
             otherwise
         end
     end
     
-    %% Caculates the vaccum coupling rate following QuantumConverter Notebook definition based on paper: 
-    % 2018_Superconducting cavity electro-optics A platform for coherent photon conversion between superconducting and photonic circuit      
-    % 1a. Extracting Field normalization constant by calculating the total 
-        % electrical energy of the optical mode. 
-    [normcoeff_optical_energy.value, normcoeff_optical_energy.unit] = mphint2(model,...
-        '(eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2)))',...
-        'surface', 'solnum', nr_solution);   
-    % 1b. Nnormalization of RF field is performed via CAPACITANCE -> Energy
-    % = 1/2*V_bias^2*C over energy per photon h_bar * omega_rf
-        % Note, for spontanous downconversion all three optical fields need to
-        % be normalized at various frequencyies. Resulting in an
-        % \sqrt(l_cavity) dependency. This is for the RF case included in
-        % the capacitance.
-   [dummy_RF] = mpheval(model,...
-        '(eps0*es.epsilonryy*wWG*lWG/hOEO)*V_bias^2/(hbar*2*pi*f_rf*2)',...
-         'solnum', 1, 'dataset', 'dset1', 'selection', interactive_domain);   
-    normcoeff_RF.value = dummy_RF.d1(1);
-    % the unit is 1/m 
-    normcoeff_RF.unit = [dummy_RF.unit];  
-    
-    % 2. extracts the nonlinear interaction. Note here es.Ey cannot be used
-    % as it is part of a different dataset. 
-    [interaction_energy.value, interaction_energy.unit] = mphint2(model,...
-        '(omega/2*eps0*ewfd.nyy^4*ewfd.Ey*conj(ewfd.Ey)*es.Ey)*r33',...
-        'surface', 'solnum', nr_solution, 'selection', interactive_domain);    
-    
-    % 3. Calcualte the vaccum coupling which includes the 2-omega factor in our definition    
-    results(1).str = 'g_0';
-    results(1).unit = '[2\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
-    g_0 = interaction_energy.value/sqrt(normcoeff_optical_energy.value)^2/sqrt(normcoeff_RF.value);
-    results(1).value = g_0 ;
-    
-
-    % extracting group refractive index via Sum(Energy)/Sum(PowerFlow) -
-    % All-plasmonic Mach-Zehnder Modulator Haffner et al. Nature Photonics
-    % (2015)
-    [mode_energy.value, mode_energy.unit] = mphint2(model,...
-        '(eps0*(ewfd.nxx^2*abs(ewfd.Ex)^2+ewfd.nyy^2*abs(ewfd.Ey)^2+ewfd.nzz^2*abs(ewfd.Ez)^2))',...
-        'surface', 'solnum', nr_solution);     
-    [mode_power_flow.value, mode_power_flow.unit] = mphint2(model,...
-        '(ewfd.Ex*conj(ewfd.Hy)-conj(ewfd.Ey)*(ewfd.Hx))',...
-        'surface', 'solnum', nr_solution); 
-    
-    % imaginary part (loss term) is neglected as 4 orders of magnitude lower
-    ng = real(3e8*mode_energy.value/mode_power_flow.value); 
-    last_colmn = size(results,2);
-    results(last_colmn+1).str = 'ng';
-    results(last_colmn+1).unit = '[]';
-    results(last_colmn+1).value = real(ng);
-    
-    neff = mphglobal(model, 'ewfd.neff', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
-    last_colmn = size(results,2);
-    results(last_colmn+1).str = 'neff';
-    results(last_colmn+1).unit = '[]';
-    results(last_colmn+1).value = neff;
-    
-    % calculating quality and damping rate including the which includes the 2-omega factor in our definition
-    Q = ng/(2*abs(imag(neff)));
-    
-    last_colmn = size(results,2);
-    results(last_colmn+1).str = 'Q';
-    results(last_colmn+1).unit = '[]';
-    results(last_colmn+1).value = Q;
-
-    last_colmn = size(results,2);
-    gamma = mphglobal(model, 'ewfd.omega', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution)/Q;
-    results(last_colmn+1).str = 'gamma';
-    results(last_colmn+1).unit = '[2\pi Hz]';
-    results(last_colmn+1).value = gamma;
-
-    last_colmn = size(results,2);
-    results(last_colmn+1).str = 'L_prop_';
-    results(last_colmn+1).unit = '[m]';
-    results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
+    if strcmp(type, 'Rf2IR')
+        % Caculates the vaccum coupling rate following QuantumConverter Notebook definition based on paper:
+        % 2018_Superconducting cavity electro-optics A platform for coherent photon conversion between superconducting and photonic circuit   
         
-    last_colmn = size(results,2);
-    C = 4.*g_0^2/gamma;
-    results(last_colmn+1).str = 'C_reduced';
-    results(last_colmn+1).unit = '[\gamma_{RF} = 2\pi 1MHz]';
-    results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
+        % 1a. Extracting Field normalization constant by calculating the total 
+            % electrical energy of the optical mode. 
+        [normcoeff_optical_energy.value, normcoeff_optical_energy.unit] = mphint2(model,...
+            '(eps0*(ewfd.nxx^2*(abs(ewfd.Ex)^2 + ewfd.nyy^2*abs(ewfd.Ey)^2 + ewfd.nzz^2*abs(ewfd.Ez)^2)))',...
+            'surface', 'solnum', nr_solution);   
+        % 1b. Nnormalization of RF field is performed via CAPACITANCE -> Energy
+        % = 1/2*V_bias^2*C over energy per photon h_bar * omega_rf
+            % Note, for spontanous downconversion all three optical fields need to
+            % be normalized at various frequencyies. Resulting in an
+            % \sqrt(l_cavity) dependency. This is for the RF case included in
+            % the capacitance.
+       [dummy_RF] = mpheval(model,...
+            '(eps0*es.epsilonryy*wWG*lWG/hOEO)*V_bias^2/(hbar*2*pi*f_rf*2)',...
+             'solnum', 1, 'dataset', 'dset1', 'selection', interactive_domain);   
+        normcoeff_RF.value = dummy_RF.d1(1);
+        % the unit is 1/m 
+        normcoeff_RF.unit = [dummy_RF.unit];  
+
+        % 2. extracts the nonlinear interaction. Note here es.Ey cannot be used
+        % as it is part of a different dataset. 
+        [interaction_energy.value, interaction_energy.unit] = mphint2(model,...
+            '(omega/2*eps0*ewfd.nyy^4*ewfd.Ey*conj(ewfd.Ey)*es.Ey)*r33',...
+            'surface', 'solnum', nr_solution, 'selection', interactive_domain);    
+
+        % 3. Calcualte the vaccum coupling which includes the 2-omega factor in our definition    
+        results(1).str = 'g_0';
+        results(1).unit = '[2\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
+        g_0 = interaction_energy.value/sqrt(normcoeff_optical_energy.value)^2/sqrt(normcoeff_RF.value);
+        results(1).value = g_0 ;
+
+
+        % extracting group refractive index via Sum(Energy)/Sum(PowerFlow) -
+        % All-plasmonic Mach-Zehnder Modulator Haffner et al. Nature Photonics
+        % (2015)
+        [mode_energy.value, mode_energy.unit] = mphint2(model,...
+            '(eps0*(ewfd.nxx^2*abs(ewfd.Ex)^2+ewfd.nyy^2*abs(ewfd.Ey)^2+ewfd.nzz^2*abs(ewfd.Ez)^2))',...
+            'surface', 'solnum', nr_solution);     
+        [mode_power_flow.value, mode_power_flow.unit] = mphint2(model,...
+            '(ewfd.Ex*conj(ewfd.Hy)-conj(ewfd.Ey)*(ewfd.Hx))',...
+            'surface', 'solnum', nr_solution); 
+
+        % imaginary part (loss term) is neglected as 4 orders of magnitude lower
+        ng = real(3e8*mode_energy.value/mode_power_flow.value); 
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'ng';
+        results(last_colmn+1).unit = '[]';
+        results(last_colmn+1).value = real(ng);
+
+        neff = mphglobal(model, 'ewfd.neff', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'neff';
+        results(last_colmn+1).unit = '[]';
+        results(last_colmn+1).value = neff;
+
+        % calculating quality and damping rate including the which includes the 2-omega factor in our definition
+        Q = ng/(2*abs(imag(neff)));
+
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'Q';
+        results(last_colmn+1).unit = '[]';
+        results(last_colmn+1).value = Q;
+
+        last_colmn = size(results,2);
+        gamma = mphglobal(model, 'ewfd.omega', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution)/Q;
+        results(last_colmn+1).str = 'gamma';
+        results(last_colmn+1).unit = '[2\pi Hz]';
+        results(last_colmn+1).value = gamma;
+
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'L_prop_';
+        results(last_colmn+1).unit = '[m]';
+        results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
+
+        last_colmn = size(results,2);
+        C = 4.*g_0^2/gamma;
+        results(last_colmn+1).str = 'C_reduced';
+        results(last_colmn+1).unit = '[\gamma_{RF} = 2\pi 1MHz]';
+        results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
+    elseif strcmp(type, 'SPDC')
+        % Caculates the vaccum coupling rate following Spontaneous Parametric Downconversion Notebook definition based on paper:
+        % Fiorentino, M. et al. (2007). Spontaneous parametric down-conversion in periodically poled KTP waveguides and bulk crystals. Optics Express, 15(12), 7479. 
+        % General Quantum Optics theory is described well in Grynberg, G. (2012). Quantization of free radiation. In Introduction to Quantum Optics (pp. 301–324).
+        
+        % 1a. Extracting Fields
+        [Ep, Es, Ei] = ExtractField(model, 'OuterSolNums', OuterSolNums, 'SolNums', nr_solution); 
+        
+        zmax = 200e-6; 
+        Ep = Ep.normalizeField(zmax);
+        Es = Es.normalizeField(zmax);
+        Ei = Ei.normalizeField(zmax);
+        g0 = overlap(Es, Ep, Ei); 
+        results(1).str = 'g_0';
+        results(1).unit = '[2\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
+        results(1).value = g0 ;
+        
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'ng';
+        results(last_colmn+1).unit = '[]';
+        results(last_colmn+1).value = [Es.vg, Ep.vg];
+        
+
+        
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'neff';
+        results(last_colmn+1).unit = '[]';
+        results(last_colmn+1).value = [Es.neff, Ep.neff];
+        
+        % calculating quality and damping rate including the which includes the 2-omega factor in our definition
+        Qs = Es.vg/(2*abs(2*Es.neff*Es.chi1i));
+        Qp = Ep.vg/(2*abs(2*Ep.neff*Ep.chi1i));
+        
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'Q';
+        results(last_colmn+1).unit = '[]';
+        results(last_colmn+1).value = [Qs, Qp];
+
+        last_colmn = size(results,2);
+        gammap = mphglobal(model, 'ewfd.omega', 'dataset', 'dset2', 'outersolnum', 1, 'solnum', nr_solution(1), 'outersolnum', OuterSolNums(1))/Qp;
+        gammas = mphglobal(model, 'ewfd.omega', 'dataset', 'dset2', 'outersolnum', 1, 'solnum', nr_solution(2), 'outersolnum', OuterSolNums(2))/Qs;
+        results(last_colmn+1).str = 'gamma';
+        results(last_colmn+1).unit = '[2\pi Hz]';
+        results(last_colmn+1).value = [gammas, gammap];
+
+        last_colmn = size(results,2);
+        results(last_colmn+1).str = 'L_prop_';
+        results(last_colmn+1).unit = '[m]';
+        results(last_colmn+1).value = [-mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset2', 'solnum', nr_solution(2), 'outersolnum', OuterSolNums(2)), ...
+            -mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset2', 'solnum', nr_solution(1), 'outersolnum', OuterSolNums(1))];   
+
+        last_colmn = size(results,2);
+        C = 4.*g0^2/gammas;
+        results(last_colmn+1).str = 'C_reduced';
+        results(last_colmn+1).unit = '[\gamma_{RF} = 2\pi 1MHz]';
+        results(last_colmn+1).value = C;  
+    elseif strcmp(type, 'QED')
+        
+    else
+        error('Type of Coupling rate Calculations not recognized!')
+        
+    end
     
 end

@@ -143,6 +143,7 @@ function [model, refr] = DispersionRelation(model, varargin)
             counter = counter + 1;
         end
     end
+    
     % Parameters SiN ! Citation wrong, but in mendeley
     % Luke, K., Yoshitomo, O., Lamont, M. R. E., Gaeta, A. L., & Lipson, M. (2015). Broadband mid-infrared frequency comb generation in a Si3N4 microresonator. Optics Letters, 40(21), 4823?4826. https://doi.org/10.134/OL.40.004823
     options = struct(...
@@ -206,6 +207,7 @@ function [model, refr] = DispersionRelation(model, varargin)
             counter = counter + 1;
         end
     end
+    
     % Parameters Organics - From Chris Material Data
     model.component('comp1').func.create('int1', 'Interpolation');
     model.component('comp1').func('int1').set('source', 'file');
