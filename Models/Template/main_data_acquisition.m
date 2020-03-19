@@ -4,6 +4,7 @@ close all
 modelpath = pwd;
 % path for global variabls, paths, material data, etc
 cd('../');
+cd('../');
 initPaths(modelpath);
 
 % Note, defaults value are set in ModelSetup_Parameters
