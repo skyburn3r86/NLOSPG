@@ -1,4 +1,4 @@
-% clear all
+clear all
 close all
 
 modelpath = pwd;
@@ -70,25 +70,22 @@ end
     end
     save_str = strrep(save_str , '.', 'pt');
     % generating folder
-    [status, msg, msgID] = mkdir(['./Results\' save_str])
-    % check if folder already exist. if true ask user if override should be
-    % performed
+    [status, msg, msgID] = mkdir(['./Results\' save_str])    
     if strcmp(msg,'Directory already exists.')
-        prompt = {'Folder already exist. Options: Redfine path string, overwrite (if name is not changed) or cancel saving:'};
+        prompt = {'Folder already exist. Options: Redfine path string, overwrite (if name is not changed) and cancel s:'};
         title = 'File Path';
         dims = [1 length(save_str)+20];
         definput = {save_str};
         save_str = inputdlg(prompt,title,dims,definput); % cancel will return empty str
         if ~isempty(save_str)
-            [status, msg, msgID] = mkdir(['./Results\' save_str])
             save(['./Results/' workspace_save_str '_Results.mat']);
             % adapt to also save sim_parameters and param_sweep
-%             writeToJson(param_list, sim_results, 'results_and_paramters')           
+            writeToJson(param_list, sim_results, 'results_and_paramters')           
         end
     else
         save(['./Results/' workspace_save_str '_Results.mat']);
         % adapt to also save sim_parameters and param_sweep
-%         writeToJson(param_list, sim_results, 'results_and_paramters')
+        writeToJson(param_list, sim_results, 'results_and_paramters')
     end
  
 
