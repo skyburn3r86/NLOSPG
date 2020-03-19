@@ -9,20 +9,20 @@ function initPaths(modelpath)
 %initPaths - loads the path of the base model, functions, class and material data
     global library_path;
     library_path = pwd;
-    %% add here cross user files, class, 
-    addpath([library_path '\DataIn']);
-    addpath([library_path '\Classes']);
-    addpath([library_path '\HelperFunctions']);
-    addpath([library_path '\DataFunctions']); 
-    
-%     cd(modelpath)                 % Removed because it changes directory
-%     to the modelpath and therefore the prefix modelpath in the following
-%     sections throws an error!
+    %% adds the general function not specific to the model 
+    folder_content = dir(library_path);
+    for jj = 1:length(folder_content)
+        if folder_content(jj).isdir == 1 && ~ strcmp(folder_content(jj).name,'.') && ~ strcmp(folder_content(jj).name,'..')
+            addpath([library_path '\' folder_content(jj).name]);     
+        end
+    end
+    cd(modelpath)
     
     %% add here model specific folders
-    addpath([modelpath '\Evaluation']);
-    addpath([modelpath '\Evaluation']);
-    addpath([modelpath '\Plotting']);
-    addpath([modelpath '\QuantumEvaluation']);
-    addpath([modelpath '\Simulation']); 
+    folder_content = dir(modelpath);
+    for jj = 1:length(folder_content)
+        if folder_content(jj).isdir == 1 && ~ strcmp(folder_content(jj).name,'.') && ~ strcmp(folder_content(jj).name,'..')
+            addpath([modelpath '\' folder_content(jj).name]);     
+        end
+    end 
 end

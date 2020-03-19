@@ -180,9 +180,9 @@ else
     save_str = [strrep([ str_data ' ' str_unit],'_',' ')];
     for jj = 3:length(para)
         if length(para{jj}.values) > 1
-        save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) '-' num2str(max(para{jj}.values)) ']'];
+            save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) '-' num2str(max(para{jj}.values)) ']'];
         else
-        save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) ']'];
+            save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) ']'];
         end
     end
     title(save_str);
