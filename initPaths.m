@@ -13,6 +13,7 @@ function initPaths(modelpath)
     addpath([library_path '\DataIn']);
     addpath([library_path '\Classes']);
     addpath([library_path '\HelperFunctions']);
+    addpath([library_path '\DataFunctions']); 
     
 %     cd(modelpath)                 % Removed because it changes directory
 %     to the modelpath and therefore the prefix modelpath in the following

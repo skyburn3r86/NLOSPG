@@ -13,7 +13,12 @@ function [model] = meshing(model, varargin)
     % Define Material Parameters
     materials = varargin{1};
     materialNames =fieldnames(materials);
-
+    
+    % Determine Factor k by saving a simulation and doing a parameter sweep
+    % over the factor k. Plot the refractive index as function of k. Take
+    % the value where you reach saturation. The Factor k is given as a
+    % parameter in the ModelSetup_Parameters
+    
     % A good starting point for a mesh shize depend on the character of the
     % mode. A plasmonic mesh should be finder then a photonic to resolve
     % the exponential decay in the metal (Screening length ie 50nm for 1550nm)
@@ -57,7 +62,7 @@ function [model] = meshing(model, varargin)
             xscale = 1; 
             yscale = 1; 
         end
-            
+        meshsize = ['1/k*' meshsize]; 
         % adding triangular mesh
         model.component('comp1').mesh('mesh1').create(['ftri', materialNames{jj}], 'FreeTri');
         model.component('comp1').mesh('mesh1').feature(['ftri', materialNames{jj}]).label(['ftri', materialNames{jj}]);

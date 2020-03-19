@@ -2,18 +2,18 @@ modelpath = pwd;
 % path for global variabls, material data, etc
 initPaths('Models/SimulationSlot');
 
-para_sweep{1}.values = linspace(150, 200, 6)*1e-9;
+para_sweep{1}.values = linspace(10, 200, 21)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
 para_sweep{2}.values = linspace(50, 100, 11)*1e-9;
 para_sweep{2}.str = 'dSlot';
 para_sweep{2}.unit = '[m]';
-para_sweep{3}.values = linspace(600, 700, 5)*1e-9;
+para_sweep{3}.values = linspace(1550, 1900, 2)*1e-9;
+para_sweep{3}.str = 'wl';
+para_sweep{3}.unit = '[m]';
+para_sweep{3}.values = linspace(300, 900, 3)*1e-9;
 para_sweep{3}.str = 'wWG';
 para_sweep{3}.unit = '[m]';
-
-global old_neff
-old_neff = 2.7; 
 
 [param_list] = combParameterSweep(para_sweep);
 for idx_param_list = 1:size(param_list.values,1)
@@ -23,7 +23,7 @@ for idx_param_list = 1:size(param_list.values,1)
     
     % ModelSetup_Parameters - init Model and defines parameters    
     [comsol_model, materials, sim_parameters] = ModelSetup_Parameters(param_list, idx_param_list,...
-        'n_start', {3.2, ' '});
+        'n_start', {2.0, ' '});
     % setup model
     comsol_model = Geometry(comsol_model, materials);
     comsol_model = Materials(comsol_model, materials);
@@ -31,7 +31,7 @@ for idx_param_list = 1:size(param_list.values,1)
     comsol_model = Physics(comsol_model, materials);
     try
         % calculate compute
-        [comsol_model] = Compute(comsol_model, 'mat', 'Si');
+        [comsol_model] = Compute(comsol_model);
     catch
         disp(['Error at Simulating' param_list.print{idx_param_list}])
         continue

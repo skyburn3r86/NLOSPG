@@ -126,7 +126,7 @@ function results = calculateVaccumCoupling(model, varargin)
     elseif strcmp(type, 'SPDC')
         % Caculates the vaccum coupling rate following Spontaneous Parametric Downconversion Notebook definition based on paper:
         % Fiorentino, M. et al. (2007). Spontaneous parametric down-conversion in periodically poled KTP waveguides and bulk crystals. Optics Express, 15(12), 7479. 
-        % General Quantum Optics theory is described well in Grynberg, G. (2012). Quantization of free radiation. In Introduction to Quantum Optics (pp. 301–324).
+        % General Quantum Optics theory is described well in Grynberg, G. (2012). Quantization of free radiation. In Introduction to Quantum Optics (pp. 301?324).
         
         % 1a. Extracting Fields
         [Ep, Es, Ei] = ExtractField(model, 'OuterSolNums', OuterSolNums, 'SolNums', nr_solution); 
@@ -137,7 +137,7 @@ function results = calculateVaccumCoupling(model, varargin)
         Ei = Ei.normalizeField(zmax);
         g0 = overlap(Es, Ep, Ei); 
         results(1).str = 'g_0';
-        results(1).unit = '[2\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
+        results(1).unit = '[2\\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
         results(1).value = g0 ;
         
         last_colmn = size(results,2);
@@ -165,7 +165,7 @@ function results = calculateVaccumCoupling(model, varargin)
         gammap = mphglobal(model, 'ewfd.omega', 'dataset', 'dset2', 'outersolnum', 1, 'solnum', nr_solution(1), 'outersolnum', OuterSolNums(1))/Qp;
         gammas = mphglobal(model, 'ewfd.omega', 'dataset', 'dset2', 'outersolnum', 1, 'solnum', nr_solution(2), 'outersolnum', OuterSolNums(2))/Qs;
         results(last_colmn+1).str = 'gamma';
-        results(last_colmn+1).unit = '[2\pi Hz]';
+        results(last_colmn+1).unit = '[2\\pi Hz]';
         results(last_colmn+1).value = [gammas, gammap];
 
         last_colmn = size(results,2);
@@ -177,8 +177,14 @@ function results = calculateVaccumCoupling(model, varargin)
         last_colmn = size(results,2);
         C = 4.*g0^2/gammas;
         results(last_colmn+1).str = 'C_reduced';
-        results(last_colmn+1).unit = '[\gamma_{RF} = 2\pi 1MHz]';
+        results(last_colmn+1).unit = '[\\gamma_{RF} = 2\\pi 1MHz]';
         results(last_colmn+1).value = C;  
+        
+        last_colmn = size(results,2);
+        lc = 1310e-3/(2*abs(real(Es.neff) - real(Ep.neff)));
+        results(last_colmn+1).str = 'lc';
+        results(last_colmn+1).unit = '[\\mum]';
+        results(last_colmn+1).value = lc;  
     elseif strcmp(type, 'QED')
         
     else

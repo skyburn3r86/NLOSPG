@@ -25,7 +25,7 @@ function [Ep, Es, Ei] = ExtractField(model, varargin)
 
     % Extract fields as function of energy conservating modes
     for ii = 1:length(OuterSolNums)
-        iter = SolNums(ii);
+        iter = OuterSolNums(ii);
         neff = mphglobal(model, 'ewfd.neff', 'dataset', 'dset2', 'outersolnum', iter, 'solnum', SolNums(ii));
 
         temp = mpheval(model, 'ewfd.Ex', 'dataset', 'dset2', 'outersolnum', iter, 'solnum', SolNums(ii));

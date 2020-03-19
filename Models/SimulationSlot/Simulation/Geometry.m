@@ -28,7 +28,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('Thermal Oxide');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hSubstrate'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' '0'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{1});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
     counter = counter + 1;
 
     % Parse parameter
@@ -49,7 +49,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('BaseWaveguide');
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hRidge'});
         model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate'});
-        model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
+        model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{3});
         counter = counter + 1;
     end
     
@@ -58,7 +58,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('WaveguideLRidge');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wWG' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim-dSlot)/2-wWG' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{3});
     counter = counter + 1;
 
     % WG Right Ridge
@@ -66,7 +66,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('WaveguideRRidge');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wWG' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim+dSlot)/2' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{3});
     counter = counter + 1;
 
     % Organics, middle
@@ -74,7 +74,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('OrganicsSlot');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'dSlot' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim-dSlot)/2' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{3});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{4});
     counter = counter + 1;
 
     % Organics top
@@ -82,7 +82,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('OrganicsTop');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hOrganic'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hRidge+hWG'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{3});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{4});
     counter = counter + 1;
 
     % Cladding L
@@ -90,7 +90,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('CladdingL');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'(wSim-(2*wWG + dSlot))/2' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{1});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
     counter = counter + 1;
 
     % Cladding R
@@ -98,7 +98,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('CladdingR');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'(wSim-(2*wWG + dSlot))/2' 'hWG'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'(wSim+(2*wWG + dSlot))/2' 'hSubstrate+hRidge'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{1});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{2});
     counter = counter + 1;
 
     % Air Buffer
@@ -106,7 +106,7 @@ function [model, Selections, BoundarySelection] = Geometry(model, varargin)
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).label('AirTop');
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('size', {'wSim' 'hAir'});
     model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('pos', {'0' 'hSubstrate+hRidge+hWG+hOrganic'});
-    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{7});
+    model.component('comp1').geom('geom1').feature(['r' num2str(counter)]).set('contributeto', materialNames{1});
     counter = counter + 1;
 
     % Parse parameter

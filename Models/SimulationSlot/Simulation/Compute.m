@@ -10,7 +10,7 @@ function [model] = Compute(model,varargin)
 % Create Study
     options = struct(...
             'mat', 'Si', ...
-            'wl', {[1305, 1310, 1315, 2615, 2620, 2625], '[nm]'});
+            'wl', {[1310,2620], '[nm]'});
     optionNames=fieldnames(options);
 
     nArgs = length(varargin);
@@ -42,10 +42,11 @@ function [model] = Compute(model,varargin)
     model.study('std1').feature('mode').activate('ewfd', true);
     model.study('std1').feature('mode').set('modeFreq', 'c_const/wl');
     model.study('std1').feature('mode').set('shiftactive', true);
+    global old_neff
     if strcmp(options(1).('mat'), 'Si')
-        model.study('std1').feature('mode').set('shift', '3.2');
+        model.study('std1').feature('mode').set('shift', num2str(old_neff));
     elseif strcmp(options(1).('mat'), 'SiNx')
-        model.study('std1').feature('mode').set('shift', '2.0');
+        model.study('std1').feature('mode').set('shift', num2str(old_neff));
     end
     % Generate the string of relevant wavelengths
     lambdas = '';
