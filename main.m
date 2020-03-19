@@ -13,7 +13,7 @@ para_sweep{3}.str = 'wWG';
 para_sweep{3}.unit = '[m]';
 
 global old_neff
-old_neff = 2.7; 
+old_neff = 3.164; 
 
 [param_list] = combParameterSweep(para_sweep);
 for idx_param_list = 1:size(param_list.values,1)
@@ -23,7 +23,7 @@ for idx_param_list = 1:size(param_list.values,1)
     
     % ModelSetup_Parameters - init Model and defines parameters    
     [comsol_model, materials, sim_parameters] = ModelSetup_Parameters(param_list, idx_param_list,...
-        'n_start', {3.2, ' '});
+        'n_start', {old_neff, ' '});
     % setup model
     comsol_model = Geometry(comsol_model, materials);
     comsol_model = Materials(comsol_model, materials);
