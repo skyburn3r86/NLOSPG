@@ -6,8 +6,19 @@
 %   JSON files have high compatibility to various programming languages, e.g. Java, Python, Matlab. It allows for
 %   Structured encoding of Data. However, can get slow for gigantic datasets, as it is not saved in bitcode, but in Ascii.
 %   However, for a dataset of under 1000 elements (such as this simulation), the json loads within miliseconds.
+%   Changelog:
+%       v1.0: (18.03.20) Support for Writing Parameters and values into json files
+%       v1.1: (20.03.20) Also Writes the non-swept parameters into the file.
 
-function [] = writeToJson(param_list, sim_results, filename)
+function [] = writeToJson(param_list, sim_results, model,  filename)
+    Params_NonSwept = mphgetexpressions(model.param);
+    Parameters = struct();
+
+    for idx_param_list = 1:size(Params_NonSwept, 1)
+        Parameters.(Params_NonSwept{idx_param_list, 1}) = struct('value', abs(Params_NonSwept{idx_param_list, 4}), 'phase', angle(Params_NonSwept{idx_param_list, 4}), 'unit', ['[' Params_NonSwept{idx_param_list, 5} ']']);
+    end
+
+    Data = struct();
     toWrite = cell(length(param_list.values), 1);
 
     for idx_param_list = 1:size(param_list.values, 1)
@@ -29,10 +40,12 @@ function [] = writeToJson(param_list, sim_results, filename)
         end
         toWrite{idx_param_list} = element;
     end
+    Data.Parameters = Parameters;
+    Data.data = toWrite;
     if ~contains(filename, 'json')
         filename = [filename '.json'];
     end
-    x = jsonencode(toWrite);
+    x = jsonencode(Data);
     fileID = fopen(filename, 'w');
     fprintf(fileID, x);
     fclose(fileID);
