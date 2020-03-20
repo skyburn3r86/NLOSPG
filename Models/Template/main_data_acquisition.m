@@ -1,4 +1,4 @@
-% clear all
+clear all
 close all
 
 modelpath = pwd;
@@ -13,9 +13,9 @@ para_sweep{1}.values = linspace(10, 200, 21)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
 para_sweep{2}.values = linspace(100, 250, 7)*1e-9;
-para_sweep{2}.str = 'hWG_bot';
+para_sweep{2}.str = 'hWG';
 para_sweep{2}.unit = '[m]';
-para_sweep{3}.values = linspace(1550, 1900, 1)*1e-9;
+para_sweep{3}.values = linspace(1550, 1550, 1)*1e-9;
 para_sweep{3}.str = 'wl';
 para_sweep{3}.unit = '[m]';
 para_sweep{4}.values = linspace(300, 900, 3)*1e-9;
@@ -24,6 +24,9 @@ para_sweep{4}.unit = '[m]';
 
 % maping N-dimensional parameter sweep onto linear list
 [param_list] = combParameterSweep(para_sweep);
+
+% defining save location
+save_folder = generateSavePath(para_sweep);
 
 for idx_param_list = 1:size(param_list.values,1)
     % displays current run
@@ -51,45 +54,18 @@ for idx_param_list = 1:size(param_list.values,1)
         save_str = strrep(save_str,']','');
         save_str = strrep(save_str,' ','_');
     if 1
-        mphsave(comsol_model, ['./ComsolModels/' save_str '.mph']);
+        try
+            mphsave(comsol_model, ['./Results/ComsolModels/' save_str '.mph']);
+        catch
+        end
     end
-    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str);
+    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str, path, 'save_path');
 end
 
 %% Saving results as jason files -> move to seperate function!
-    % generating folder name
-    save_str = [];
-    for jj = 1:length(para_sweep)
-        if length(para_sweep{jj}.values) > 1
-            save_str = [save_str '__' para_sweep{jj}.str ...
-                '_(' num2str(min(para_sweep{jj}.values)) '-' num2str(max(para_sweep{jj}.values)) ')'...
-                para_sweep{jj}.unit];
-        else
-            save_str = [save_str '__' para_sweep{jj}.str '_(' num2str(min(para_sweep{jj}.values)) ')'...
-                para_sweep{jj}.unit];
-        end
-    end
-    save_str = strrep(save_str , '.', 'pt');
-    % generating folder
-    [status, msg, msgID] = mkdir(['./Results\' save_str])
-    % check if folder already exist. if true ask user if override should be
-    % performed
-    if strcmp(msg,'Directory already exists.')
-        prompt = {'Folder already exist. Options: Redfine path string, overwrite (if name is not changed) or cancel saving:'};
-        title = 'File Path';
-        dims = [1 length(save_str)+20];
-        definput = {save_str};
-        save_str = inputdlg(prompt,title,dims,definput); % cancel will return empty str
-        if ~isempty(save_str)
-            [status, msg, msgID] = mkdir(['./Results\' save_str])
-            save(['./Results/' workspace_save_str '_Results.mat']);
-            % adapt to also save sim_parameters and param_sweep
-%             writeToJson(param_list, sim_results, 'results_and_paramters')           
-        end
-    else
-        save(['./Results/' workspace_save_str '_Results.mat']);
-        % adapt to also save sim_parameters and param_sweep
-%         writeToJson(param_list, sim_results, 'results_and_paramters')
-    end
- 
+
+save(['./Results/' save_folder '\rawData.mat']);
+% adapt to also save sim_parameters and param_sweep
+%             writeToJson(param_list, sim_results, 'results_and_paramters')
+
 

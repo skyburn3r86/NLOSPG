@@ -81,8 +81,8 @@ for idx_parameter = 1:length(para)
     colm_list = colm_in_para_list(idx_parameter);
     row_vector = 0;
     % check if parameter (para) defined by user is within min and maximum of para_list
-    if min(para{idx_parameter}.values) > min(para_list.values(:,colm_list))*0.9999
-        if max(para{idx_parameter}.values) < max(para_list.values(:,colm_list))*1.0001
+    if min(para{idx_parameter}.values) >= min(para_list.values(:,colm_list))
+        if max(para{idx_parameter}.values) <= max(para_list.values(:,colm_list))
             for idx_list = 1:length(para_list.values(:,colm_list))
                 rel_error = abs((para{idx_parameter}.values - para_list.values(idx_list,colm_list))./para_list.values(idx_list,colm_list));
                 row_vector(idx_list,1) = ~isempty(find(rel_error < 1e-3));

@@ -39,7 +39,7 @@ function simulation_results = comsolEvaluation(model, simulation_parameters, mat
     % plotting and saving modes
     for jj = 1:length(nr_solutionTM)
         if ~isempty(nr_solutionTM)
-            saveSolutionSnapshot(model, 'expression', 'ewfd.normE', 'nr_solution', nr_solutionTM(jj),...
+            saveSolutionSnapshot(model, 'expression', 'abs(ewfd.Ez)', 'nr_solution', nr_solutionTM(jj),...
                 'title', title_str);
         end
     end

@@ -40,6 +40,10 @@ function [model] = meshing(model, varargin)
                 meshsize = 'wl/10';                
                 xscale = 1;
                 yscale = 1;
+            elseif ~isempty(strfind(lower(materialNames{jj}), 'wg'))
+                meshsize = ['wl/' num2str(refractive_index) '/8/3'];               
+                xscale = 1;
+                yscale = 1;
             else % case of photonic waveguide/components
                 % open the txt file of the material to extract the data and
                 % interpolate the refractive index

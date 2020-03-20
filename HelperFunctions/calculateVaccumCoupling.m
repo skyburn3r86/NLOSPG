@@ -77,8 +77,9 @@ function results = calculateVaccumCoupling(model, varargin)
 
 
         % extracting group refractive index via Sum(Energy)/Sum(PowerFlow) -
-        % All-plasmonic Mach-Zehnder Modulator Haffner et al. Nature Photonics
-        % (2015)
+        % Group velocity in lossy periodic structured media - https://journals.aps.org/pra/pdf/10.1103/PhysRevA.82.053825 
+        % Poyinting Vector density = N/ms = W/m^2 per Area 
+        % Mode Energy denisty = J/m^3
         [mode_energy.value, mode_energy.unit] = mphint2(model,...
             '(eps0*(ewfd.nxx^2*abs(ewfd.Ex)^2+ewfd.nyy^2*abs(ewfd.Ey)^2+ewfd.nzz^2*abs(ewfd.Ez)^2))',...
             'surface', 'solnum', nr_solution);     
@@ -123,6 +124,7 @@ function results = calculateVaccumCoupling(model, varargin)
         results(last_colmn+1).str = 'C_reduced';
         results(last_colmn+1).unit = '[\gamma_{RF} = 2\pi 1MHz]';
         results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);   
+        
     elseif strcmp(type, 'SPDC')
         % Caculates the vaccum coupling rate following Spontaneous Parametric Downconversion Notebook definition based on paper:
         % Fiorentino, M. et al. (2007). Spontaneous parametric down-conversion in periodically poled KTP waveguides and bulk crystals. Optics Express, 15(12), 7479. 
@@ -137,7 +139,7 @@ function results = calculateVaccumCoupling(model, varargin)
         Ei = Ei.normalizeField(zmax);
         g0 = overlap(Es, Ep, Ei); 
         results(1).str = 'g_0';
-        results(1).unit = '[2\\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
+        results(1).unit = '[2pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
         results(1).value = g0 ;
         
         last_colmn = size(results,2);
