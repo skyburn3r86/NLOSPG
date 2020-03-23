@@ -11,7 +11,7 @@ function results = calculateVaccumCoupling(model, varargin)
 
 % TO DO - add the node finder to check for order of mode
 %       - power confinement criteria
-
+    global old_Ep
     global library_path
 
     %% checks that paris of input argements are defined
@@ -127,10 +127,10 @@ function results = calculateVaccumCoupling(model, varargin)
         % Caculates the vaccum coupling rate following Spontaneous Parametric Downconversion Notebook definition based on paper:
         % Fiorentino, M. et al. (2007). Spontaneous parametric down-conversion in periodically poled KTP waveguides and bulk crystals. Optics Express, 15(12), 7479. 
         % General Quantum Optics theory is described well in Grynberg, G. (2012). Quantization of free radiation. In Introduction to Quantum Optics (pp. 301?324).
-        
+
         % 1a. Extracting Fields
         [Ep, Es, Ei] = ExtractField(model, 'OuterSolNums', OuterSolNums, 'SolNums', nr_solution); 
-        
+        old_Ep = Ep; 
         zmax = 200e-6; 
         Ep = Ep.normalizeField(zmax);
         Es = Es.normalizeField(zmax);
