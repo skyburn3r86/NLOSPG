@@ -10,7 +10,6 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
     param_list_values = param_list.values;
     param_list_values = param_list_values(para_list_index,:);
     param_list_str = param_list.str;
-    param_list_unit = param_list.unit;
     
     
 	% ***** Read Arguments
@@ -21,10 +20,9 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
     % wl opertion wavelength of simulation
     % default values are
     comsol_parameters = struct(...
-        'wSim', {6, '[um]'},...
+        'wSim', {4, '[um]'},...
         'hSubstrate', {2, '[um]'},...
-        'hWG_top', {160, '[nm]'},...
-        'hWG_bot', {160, '[nm]'},...
+        'hWG', {160, '[nm]'},...
         'wWG', {500, '[nm]'},...
         'lWG', {10e-6, '[m]'},...
         'hOrganic', {200, '[nm]'},...
@@ -79,6 +77,7 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
 	materials = struct(...
 		'Substrate', 'eps_SiO2_Lemarchand_2013_250nm__2500nm.txt',...
 		'PhotonicWG', 'eps_Si_Green_2008.txt',...
+		'OEOWG', 'eps_HD_BB_OH_UniWashington.txt',...
 		'OEO', 'eps_HD_BB_OH_UniWashington.txt',...
 		'Metal_1', 'eps_Au_IEF_1604.txt',...
 		'Metal_2', 'eps_Cu_McPeak.txt',...
@@ -149,15 +148,23 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
         str_file = materials.(name); 
         % TO DO NK
         if ~isempty(strfind(materials.(name), '.txt'))
-            % ture if interpolation file defined for material
-            interpDummy = model.func.create(MaterialNames{ii}, 'Interpolation');
-            interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
-            interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
-            interpDummy.set('source', 'file');
-            interpDummy.set('filename', [library_path '\DataIn\' str_file]);
-            interpDummy.set('extrap', 'linear');
-            interpDummy = [];
-        else
+            if ~isempty(strfind(materials.(name), 'eps'))
+                % ture if material defined via epsilon
+                interpDummy = model.func.create(MaterialNames{ii}, 'Interpolation');
+                interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
+                interpDummy.set('source', 'file');
+                interpDummy.set('filename', [library_path '\DataIn\' str_file]);
+                interpDummy.set('extrap', 'linear');
+                interpDummy = [];
+            elseif ~isempty(strfind(materials.(name), 'nk'))
+                % true if material defined via nk
+                interpDummy = model.func.create(MaterialNames{ii}, 'Interpolation');
+                interpDummy.set('funcs', {['n' MaterialNames{ii}] '1'; ['k' MaterialNames{ii}] '2'});
+                interpDummy.set('source', 'file');
+                interpDummy.set('filename', [library_path '\DataIn\' str_file]);
+                interpDummy.set('extrap', 'linear');
+                interpDummy = [];                
+            end
             
         end
     end
