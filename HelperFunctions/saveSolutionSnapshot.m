@@ -18,7 +18,8 @@ function saveSolutionSnapshot(model, varargin)
     if round(nArgs/2)~=nArgs/2
        error('Arguments needs propertyName/propertyValue pairs')
     end
-    
+   
+        
     %% default value definition
     % Threshold value (0.1) needs to be tested for you case.
     expression = 'ewfd.normE';
@@ -37,16 +38,19 @@ function saveSolutionSnapshot(model, varargin)
                 case 'title'
                     title_str = varargin{ii+1};
                 case 'path'
-                    title_str = varargin{ii+1};
+                    path_str = varargin{ii+1};
                 case 'OuterSolNum'
                     outerSol = varargin{ii+1};
                 case 'dset'
-                    dset = varargin{ii+1}; 
+                    dset = varargin{ii+1};
                 otherwise
             end
         end  
          
 
+        % generating folder
+        [status, msg, msgID] = mkdir(['./Results\' path_str '\FieldProfiles\']);
+        
         %% extract fields
         temp = mpheval(model, expression, 'dataset', dset, 'outersolnum', outerSol, 'solnum', nr_solution);
         neff = mphglobal(model, 'ewfd.neff', 'dataset', dset, 'outersolnum', outerSol, 'solnum', nr_solution);
@@ -90,6 +94,6 @@ function saveSolutionSnapshot(model, varargin)
         xlabel('x index [um]');
         ylabel('y index [um]');
         title(strrep(title_str,'_', ' '));
-        saveas(gcf, [path_str title_str '.jpeg']);  
+        saveas(gcf, ['./Results\' path_str '\FieldProfiles\' title_str '.jpeg']);  
         close all
 end

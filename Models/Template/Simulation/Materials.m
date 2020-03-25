@@ -31,7 +31,8 @@ function [model] = Materials(model,varargin)
     % Define Parameters for ElectroStatics
     ES = struct(...
         'eps_Al2O3', '9.8',...
-        'eps_OEO', '5.6');
+        'eps_OEO', '5.6',...
+        'eps_OEOWG', '5.6');
 
     for ii = 1:length(materialNames)
         name = materialNames{ii};
@@ -53,7 +54,7 @@ function [model] = Materials(model,varargin)
         objects = mphgetselection(model.selection(['geom1_' materialNames{ii} '_dom']));
         model_dummy.selection.set(objects.entities);
            
-        if strcmp(name, 'Al2O3') || strcmp(name, 'OEO')
+        if strcmp(name, 'Al2O3') || ~isempty(strfind(lower(name),'oeo'))
             eps = ES.(['eps_' name]);
             model.component('comp1').material(['mat' name]).propertyGroup('def').set('relpermittivity', {eps});
         end

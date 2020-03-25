@@ -41,6 +41,7 @@ function [model] = meshing(model, varargin)
                 xscale = 1;
                 yscale = 1;
             elseif ~isempty(strfind(lower(materialNames{jj}), 'wg'))
+                refractive_index = real(extractRefractiveIndex(materials.(materialNames{jj}), 'model', model));
                 meshsize = ['wl/' num2str(refractive_index) '/8/3'];               
                 xscale = 1;
                 yscale = 1;
@@ -48,7 +49,7 @@ function [model] = meshing(model, varargin)
                 % open the txt file of the material to extract the data and
                 % interpolate the refractive index
                 refractive_index = real(extractRefractiveIndex(materials.(materialNames{jj}), 'model', model));
-                meshsize = ['wl/' num2str(refractive_index) '/8'];       
+                meshsize = ['wl/' num2str(refractive_index) '/8/3'];       
                 xscale = 1;
                 yscale = 1;
             end

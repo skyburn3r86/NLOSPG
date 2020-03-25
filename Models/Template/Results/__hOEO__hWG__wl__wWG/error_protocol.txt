@@ -1,0 +1,24 @@
+25-Mar-2020 18:00:29
+__hOEO_1e-08m__hWG_1pt5e-07m__wl_1pt55e-06m__wWG_3e-07m
+Error in ComsolEvaluation/findGuidedModes no TM mode found
+************************************************
+25-Mar-2020 18:01:31
+__hOEO_2pt2667e-08m__hWG_1pt5e-07m__wl_1pt55e-06m__wWG_3e-07m
+Error in ComsolEvaluation/findGuidedModes no TM mode found
+************************************************
+25-Mar-2020 18:02:34
+__hOEO_3pt5333e-08m__hWG_1pt5e-07m__wl_1pt55e-06m__wWG_3e-07m
+Error in ComsolEvaluation/findGuidedModes no TM mode found
+************************************************
+25-Mar-2020 18:03:37
+__hOEO_4pt8e-08m__hWG_1pt5e-07m__wl_1pt55e-06m__wWG_3e-07m
+Error in ComsolEvaluation/findGuidedModes no TM mode found
+************************************************
+25-Mar-2020 18:04:40
+__hOEO_6pt0667e-08m__hWG_1pt5e-07m__wl_1pt55e-06m__wWG_3e-07m
+Error in ComsolEvaluation/findGuidedModes no TM mode found
+************************************************
+25-Mar-2020 18:05:43
+__hOEO_7pt3333e-08m__hWG_1pt5e-07m__wl_1pt55e-06m__wWG_3e-07m
+Error in ComsolEvaluation/findGuidedModes no TM mode found
+************************************************
