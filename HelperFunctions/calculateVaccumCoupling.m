@@ -42,7 +42,7 @@ function results = calculateVaccumCoupling(model, varargin)
             case 'OuterSolNums'
                 OuterSolNums = varargin{ii+1};
             case 'error_flag'
-                errorFlag = varargin{ii+1};                
+                error_flag = varargin{ii+1};                
             otherwise
         end
     end

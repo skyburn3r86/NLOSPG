@@ -9,10 +9,10 @@ initPaths(modelpath);
 
 % Note, defaults value are set in ModelSetup_Parameters
 % Sweep parameters. String has to match parameter name of the comsol model 
-para_sweep{1}.values = linspace(10, 200, 16)*1e-9;
+para_sweep{1}.values = linspace(10, 300, 16)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(150, 350, 7)*1e-9;
+para_sweep{2}.values = linspace(150, 450, 7)*1e-9;
 para_sweep{2}.str = 'hWG';
 para_sweep{2}.unit = '[m]';
 para_sweep{3}.values = linspace(1550, 1550, 1)*1e-9;
@@ -55,7 +55,7 @@ for idx_param_list = 1:size(param_list.values,1)
         file_str = strrep(file_str,' ','_');
     if 1
         try
-            mphsave(comsol_model, ['./Results/ComsolModels/' file_str '.mph']);
+            mphsave(comsol_model, ['./Results/' save_folder '/ComsolModels/' file_str '.mph']);
         catch
         end
     end
