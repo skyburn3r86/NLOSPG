@@ -25,9 +25,10 @@ function saveSolutionSnapshot(model, varargin)
     nr_solution = 1;
     title_str = 'modeProfile';
     path_str = './Results/FieldProfiles/';
-    
+    outerSol = 1; 
+    dset = 'dset1';
     %% scans through varagin. -1 and +1 of for loop due to option/value pairs
-        for ii = 1:length(varargin)-1
+        for ii = 1:2:length(varargin)-1
             switch varargin{ii}
                 case 'expression'
                     expression = varargin{ii+1};
@@ -37,20 +38,25 @@ function saveSolutionSnapshot(model, varargin)
                     title_str = varargin{ii+1};
                 case 'path'
                     title_str = varargin{ii+1};
+                case 'OuterSolNum'
+                    outerSol = varargin{ii+1};
+                case 'dset'
+                    dset = varargin{ii+1}; 
                 otherwise
             end
         end  
-        
+         
+
         %% extract fields
-        temp = mpheval(model, expression, 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
-        neff = mphglobal(model, 'ewfd.neff', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
+        temp = mpheval(model, expression, 'dataset', dset, 'outersolnum', outerSol, 'solnum', nr_solution);
+        neff = mphglobal(model, 'ewfd.neff', 'dataset', dset, 'outersolnum', outerSol, 'solnum', nr_solution);
         title_str = [title_str '_neff_' num2str(real(round(neff*1000)/1000))];
         title_str = strrep(title_str,'.','pt');
         extracted_property = temp.('d1');
         cords = temp.('p');
         x = cords(1, :);
         y = cords(2, :);
-        n = 200;
+        n = 400;
         % define edges
         x_edge=linspace(min(x),max(x),n);
         y_edge=linspace(min(y),max(y),n);

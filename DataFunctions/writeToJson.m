@@ -16,10 +16,16 @@ function [] = writeToJson(param_list, sim_results, filename)
         for ii = 1:length(param_list.str)
             element.(param_list.str{ii}) =  struct('value', param_list.values(idx_param_list, ii), 'unit', param_list.unit{ii});
         end
-
+        idx = ['s', 'p']; 
         temp = sim_results{idx_param_list,1};
         for ii = 1:length(temp)
-            element.(temp(ii).str) = struct('value', temp(ii).value, 'unit', temp(ii).unit);
+            if length(temp(ii).value) > 1
+                for kk = 1:length(temp(ii).value)
+                    element.([temp(ii).str '_' idx(kk)]) = struct('value', abs(temp(ii).value(kk)), 'phase', angle(temp(ii).value(kk)), 'unit', temp(ii).unit);
+                end
+            else
+                element.(temp(ii).str) = struct('value', abs(temp(ii).value), 'phase', angle(temp(ii).value), 'unit', temp(ii).unit);
+            end
         end
         toWrite{idx_param_list} = element;
     end
