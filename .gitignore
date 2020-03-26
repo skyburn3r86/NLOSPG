@@ -9,3 +9,5 @@ ComsolModels/*
 *.lock
 *.m_old
 *.avi
+Results/*
+error_protocol.txt
