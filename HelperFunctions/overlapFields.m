@@ -29,12 +29,12 @@ function [overlap, field] = overlapFields(model, oldField, varargin)
         switch varargin{ii}
             case 'dset'
                 dset = varargin{ii + 1};
-            case 'solnum'
+            case 'SolNums'
                 solnum = varargin{ii + 1};
-            case 'outersolnum'
+            case 'OuterSolNums'
                 outersolnum = varargin{ii + 1};
             case 'N'
-                N = 400;
+                N = varargin{ii + 1};
         end
     end
 
@@ -58,7 +58,7 @@ function [overlap, field] = overlapFields(model, oldField, varargin)
     
     % Loads Fields from Simulation. Unfortunately, returns one single row vector. . Remapping using matlab functions
     [t.Ex, t.Ey, t.Hx, t.Hy, t.Ez, t.Hz] = mphinterp(model ,{'ewfd.Ex','ewfd.Ey','ewfd.Hx','ewfd.Hy','ewfd.Ez','ewfd.Hz'}, ...
-    'coord',coord,'solnum',solnum,'outersolnum',outersolnum);
+    'dataset', dset, 'coord',coord, 'solnum',solnum,'outersolnum',outersolnum);
     o.Ex = reshape(oldField.ux, [1, N^2]); 
     o.Ey = reshape(oldField.uy, [1, N^2]);
     o.Ez = reshape(oldField.uz, [1, N^2]);
