@@ -13,7 +13,7 @@ function initPaths(modelpath)
     folder_content = dir(library_path);
     for jj = 1:length(folder_content)
         if folder_content(jj).isdir == 1 && ~ strcmp(folder_content(jj).name,'.') && ~ strcmp(folder_content(jj).name,'..')
-            addpath([library_path '\' folder_content(jj).name]);     
+            addpath([library_path '/' folder_content(jj).name]);     
         end
     end
     cd(modelpath)
@@ -22,7 +22,7 @@ function initPaths(modelpath)
     folder_content = dir(modelpath);
     for jj = 1:length(folder_content)
         if folder_content(jj).isdir == 1 && ~ strcmp(folder_content(jj).name,'.') && ~ strcmp(folder_content(jj).name,'..')
-            addpath([modelpath '\' folder_content(jj).name]);     
+            addpath([modelpath '/' folder_content(jj).name]);     
         end
     end 
 end

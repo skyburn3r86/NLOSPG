@@ -94,6 +94,6 @@ function saveSolutionSnapshot(model, varargin)
         xlabel('x index [um]');
         ylabel('y index [um]');
         title(strrep(title_str,'_', ' '));
-        saveas(gcf, ['./Results\' path_str '\FieldProfiles\' title_str '.jpeg']);  
+        saveas(gcf, [path_str  title_str '.jpeg']);  
         close all
 end

@@ -4,21 +4,21 @@ modelpath = pwd;
 cd('../..');
 initPaths(modelpath);
 
-% para_sweep{1}.values = linspace(150, 200, 1)*1e-9;
+
 para_sweep{1}.values = linspace(100, 200, 3)*1e-9;
 para_sweep{1}.str = 'hWG';
 para_sweep{1}.unit = '[m]';
 para_sweep{2}.values = linspace(25, 125, 5)*1e-9; 
 para_sweep{2}.str = 'dSlot';
 para_sweep{2}.unit = '[m]';
-para_sweep{3}.values = linspace(300, 800, 101)*1e-9;
+para_sweep{3}.values = linspace(450, 800, (800-450)/25 + 1)*1e-9;
 para_sweep{3}.str = 'wWG';
 para_sweep{3}.unit = '[m]';
 
 global old_Ep
 global old_neff
 
-old_neff = 2.72; 
+old_neff = 2.18; 
 old_Ep = 0; 
 
 [param_list] = combParameterSweep(para_sweep);
@@ -30,7 +30,7 @@ for idx_param_list = 1:size(param_list.values,1)
 
     % ModelSetup_Parameters - init Model and defines parameters    
     [comsol_model, materials, sim_parameters] = ModelSetup_Parameters(param_list, idx_param_list,...
-        'n_start', {old_neff, ' '}, 'hWG', {hWG, '[nm]'});
+        'n_start', {old_neff, ' '}, 'hWG', {340, '[nm]'});
     
     % setup model
     comsol_model = Geometry(comsol_model, materials);

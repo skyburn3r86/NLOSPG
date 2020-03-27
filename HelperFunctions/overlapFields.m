@@ -38,7 +38,7 @@ function [overlap, field] = overlapFields(model, oldField, varargin)
         end
     end
 
-    % creating the meshgrid to interpolate the mph model onto. This is similar to using mpheval, and then mapping onto
+        % creating the meshgrid to interpolate the mph model onto. This is similar to using mpheval, and then mapping onto
     % a regular meshgrid. This seems to be less time consuming, More detailed analysis should be made.
 
     % loads information about coordinate system from the simulation
@@ -59,21 +59,27 @@ function [overlap, field] = overlapFields(model, oldField, varargin)
     % Loads Fields from Simulation. Unfortunately, returns one single row vector. . Remapping using matlab functions
     [t.Ex, t.Ey, t.Hx, t.Hy, t.Ez, t.Hz] = mphinterp(model ,{'ewfd.Ex','ewfd.Ey','ewfd.Hx','ewfd.Hy','ewfd.Ez','ewfd.Hz'}, ...
     'dataset', dset, 'coord',coord, 'solnum',solnum,'outersolnum',outersolnum);
-    o.Ex = reshape(oldField.ux, [1, N^2]); 
-    o.Ey = reshape(oldField.uy, [1, N^2]);
-    o.Ez = reshape(oldField.uz, [1, N^2]);
-    o.Hx = reshape(oldField.vx, [1, N^2]);
-    o.Hy = reshape(oldField.vy, [1, N^2]);
-    o.Hz = reshape(oldField.vz, [1, N^2]);
+    if isa(oldField, 'ClassicalField')
+        o.Ex = reshape(oldField.ux, [1, N^2]); 
+        o.Ey = reshape(oldField.uy, [1, N^2]);
+        o.Ez = reshape(oldField.uz, [1, N^2]);
+        o.Hx = reshape(oldField.vx, [1, N^2]);
+        o.Hy = reshape(oldField.vy, [1, N^2]);
+        o.Hz = reshape(oldField.vz, [1, N^2]);
+
+        % Calculate normalization, i.e. the total input power from both the input mode and the tb Coupled mode.
+        Ptot = 1/2 * sum(real(o.Ex.*conj(o.Hy) - o.Ey.*conj(o.Hx)));
+        PTarget = 1/2 * sum(real(t.Ex.*conj(t.Hy) - t.Ey.*conj(t.Hx)));
+
+        % Calculate the overlap
+        overlap = abs(1/4*sum(o.Ex.*conj(t.Hy) - o.Ey.*conj(t.Hx) + o.Hy.*conj(t.Ex) - o.Hx.*conj(t.Ey))) .^2;
+        overlap = overlap/Ptot/PTarget;
+    else
+        disp('Reference Field is not a Field. Skipping overlap Calculations. Returning only field instead');
+        overlap = 0; 
+    end
     
-    % Calculate normalization, i.e. the total input power from both the input mode and the tb Coupled mode.
-    Ptot = 1/2 * sum(real(o.Ex.*conj(o.Hy) - o.Ey.*conj(o.Hx)));
-    PTarget = 1/2 * sum(real(t.Ex.*conj(t.Hy) - t.Ey.*conj(t.Hx)));
-
-    % Calculate the overlap
-    overlap = abs(1/4*sum(o.Ex.*conj(t.Hy) - o.Ey.*conj(t.Hx) + o.Hy.*conj(t.Ex) - o.Hx.*conj(t.Ey))) .^2;
-    overlap = overlap/Ptot/PTarget;
-
     % Return the classicalfield
-    field = ClassicalField(x_edge, y_edge, t.Ex, t.Ey, t.Ez, t.Hx, t.Hy, t.Hz, 0, 0, 0, 1310e-9);
+    field = ClassicalField(x_edge, y_edge, reshape(t.Ex, [N,N]), ...
+        reshape(t.Ey, [N,N]), reshape(t.Ez, [N,N]), reshape(t.Hx, [N,N]), reshape(t.Hy, [N,N]), reshape(t.Hz, [N,N]), 0, 0, 0, 1310e-9);
     end
