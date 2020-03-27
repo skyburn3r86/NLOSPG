@@ -66,15 +66,15 @@ function model = Geometry(model, varargin)
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'OEO_cladd_left'], 'Rectangle');
     geom_dummy.label('OEO_cladd_left');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'-wWG/2-wSim/4' 'hOEO/2'});
-    geom_dummy.set('size', {'wSim/2' 'hOEO'});    
+    geom_dummy.set('pos', {'-wWG/4-wSim/4' 'hOEO/2'});
+    geom_dummy.set('size', {'wSim/2-wWG/2' 'hOEO'});    
     model.component('comp1').geom('geom1').feature('r_OEO_cladd_left').set('contributeto', materialNames(4));
     
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'OEO_cladd_right'], 'Rectangle');
     geom_dummy.label('OEO_cladd_right');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'wWG/2+wSim/4' 'hOEO/2'});
-    geom_dummy.set('size', {'wSim/2' 'hOEO'});    
+    geom_dummy.set('pos', {'wWG/4+wSim/4' 'hOEO/2'});
+    geom_dummy.set('size', {'wSim/2-wWG/2' 'hOEO'});    
     model.component('comp1').geom('geom1').feature('r_OEO_cladd_right').set('contributeto', materialNames(4));
     
     % generating bottom graphene electrode entities via a Polygon

@@ -149,6 +149,7 @@ if length(para) == 1
         xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
         ylabel(strrep([ str_data ' ' str_unit],'_',' '));
         if exist('save_path')
+            % to do add save_folder
             saveas(gcf, [save_path strrep([ str_data ' ' str_unit],'_',' ') '.jpeg']);
             saveas(gcf, [save_path strrep([ str_data ' ' str_unit],'_',' ') '.fig']);
         end

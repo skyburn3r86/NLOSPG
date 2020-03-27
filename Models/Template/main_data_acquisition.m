@@ -9,16 +9,16 @@ initPaths(modelpath);
 
 % Note, defaults value are set in ModelSetup_Parameters
 % Sweep parameters. String has to match parameter name of the comsol model 
-para_sweep{1}.values = linspace(10, 200, 21)*1e-9;
+para_sweep{1}.values = linspace(10, 300, 16)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(100, 250, 7)*1e-9;
+para_sweep{2}.values = linspace(150, 450, 7)*1e-9;
 para_sweep{2}.str = 'hWG';
 para_sweep{2}.unit = '[m]';
 para_sweep{3}.values = linspace(1550, 1550, 1)*1e-9;
 para_sweep{3}.str = 'wl';
 para_sweep{3}.unit = '[m]';
-para_sweep{4}.values = linspace(300, 900, 3)*1e-9;
+para_sweep{4}.values = linspace(300, 900, 2)*1e-9;
 para_sweep{4}.str = 'wWG';
 para_sweep{4}.unit = '[m]';
 
@@ -48,24 +48,24 @@ for idx_param_list = 1:size(param_list.values,1)
     end
     
     % Save Comsol Model & Evaluate
-        save_str = strrep(param_list.print{idx_param_list},'>_<', '');
-        save_str = strrep(save_str,'_','');
-        save_str = strrep(save_str,'[','');
-        save_str = strrep(save_str,']','');
-        save_str = strrep(save_str,' ','_');
+        file_str = strrep(param_list.print{idx_param_list},'>_<', '');
+        file_str = strrep(file_str,'_','');
+        file_str = strrep(file_str,'[','');
+        file_str = strrep(file_str,']','');
+        file_str = strrep(file_str,' ','_');
     if 1
         try
-            mphsave(comsol_model, ['./Results/ComsolModels/' save_str '.mph']);
+            mphsave(comsol_model, ['./Results/' save_folder '/ComsolModels/' file_str '.mph']);
         catch
         end
     end
-    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str, path, 'save_path');
+    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', file_str, 'path', save_folder);   
 end
 
 %% Saving results as jason files -> move to seperate function!
 
 save(['./Results/' save_folder '\rawData.mat']);
 % adapt to also save sim_parameters and param_sweep
-%             writeToJson(param_list, sim_results, 'results_and_paramters')
+            writeToJson(param_list, sim_results, 'results_and_paramters')
 
 

@@ -47,7 +47,8 @@ function [model] = Physics(model, varargin)
     % Add Electrostatics - here limited to the OEO domain between top and
     % bottom silicon 
     model.component('comp1').physics.create('es', 'Electrostatics', 'geom1');
-    material_scattering = {'OEO'};
+    % define materials that are subject to ES simulations
+    material_scattering = {'OEO', 'OEOWG'};
     selection = [];
     for jj = 1:length(material_scattering)
         object = mphgetselection(model.selection(['geom1_' material_scattering{jj} '_dom']));
@@ -57,12 +58,12 @@ function [model] = Physics(model, varargin)
     
     % Create Ground Potential
     model.component('comp1').physics('es').create('gnd1', 'Ground', 1);    
-    selection = [12 17];
+    selection = [13 19];
     model.component('comp1').physics('es').feature('gnd1').selection.set(selection);
 
     % Create Electrode Potential
     model.component('comp1').physics('es').create('pot1', 'ElectricPotential', 1);
-    selection = [4 10];
+    selection = [4 11];
     model.component('comp1').physics('es').feature('pot1').selection.set(selection);
 %     % Set Voltage
 %     V = '0 [V]';

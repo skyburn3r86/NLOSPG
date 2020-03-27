@@ -2,15 +2,12 @@
 % Author:           Christian Haffner
 % E-Mail:           christian.haffner@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
-% Last Edited:      Christian Haffner
     
 function results = calculateVaccumCoupling(model, varargin)
 %Input Variables: - model = comsol model
 % VARARGIN options (extend on need)
-% 'type' - defines quantum converter algorithums or spontanous parameteric downconversion
-% 'nr_solution' - flag to save or  of the comsol results to plott and save
-% 'errorFlag' - flag marker 0 (false) or 1 (true) that is handed over from
-% previous functions to mark failed simulations. 
+% 1. 'type' - defines quantum converter algorithums or spontanous parameteric downconversion
+% 2. 'nr_solution' - flag to save or  of the comsol results to plott and save
 
 % TO DO - add the node finder to check for order of mode
 %       - power confinement criteria
@@ -26,7 +23,6 @@ function results = calculateVaccumCoupling(model, varargin)
     %% default value definition
     type = 'Rf2IR';
     interactive_domain = 1; 
-    error_flag = 0;
     
     %% scans through varagin. -1 and +1 of for loop due to option/value pairs
     for ii = 1:2:length(varargin)-1
@@ -41,8 +37,7 @@ function results = calculateVaccumCoupling(model, varargin)
                 interactive_domain = objects.entities;
             case 'OuterSolNums'
                 OuterSolNums = varargin{ii+1};
-            case 'error_flag'
-                error_flag = varargin{ii+1};                
+            case 'error'
             otherwise
         end
     end
@@ -132,10 +127,6 @@ function results = calculateVaccumCoupling(model, varargin)
             results(last_colmn+1).value = C;
             
         catch
-            error_flag = 1;
-        end
-        
-        if error_flag == 1;
             % error during extraction renders simulation invalid --> NaN
             results(1).str = 'g_0';
             results(1).unit = '[2\pi Hz]';
@@ -220,12 +211,8 @@ function results = calculateVaccumCoupling(model, varargin)
             results(last_colmn+1).str = 'lc';
             results(last_colmn+1).unit = '[\\mum]';
             results(last_colmn+1).value = lc;
-     
+            
         catch
-            error_flag = 1;
-        end
-        
-        if error_flag == 1
             % error during extraction renders simulation invalid --> NaN
             results(1).str = 'g_0';
             results(1).unit = '[2\pi Hz]';
@@ -255,7 +242,8 @@ function results = calculateVaccumCoupling(model, varargin)
     elseif strcmp(type, 'QED')
         
     else
-        error('Type of Coupling rate Calculations not recognized!')        
+        error('Type of Coupling rate Calculations not recognized!')
+        
     end
     
 end

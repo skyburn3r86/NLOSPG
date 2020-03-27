@@ -9,4 +9,6 @@ ComsolModels/*
 *.lock
 *.m_old
 *.avi
-*.asv
+*.jpeg
+*.tiff
+error_protocol.txt
