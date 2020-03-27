@@ -137,7 +137,25 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
     end
     model.component.create('comp1', true);	
     
-	% Setup Material - Input wavelength is given in nm input arguments is wl*1e9.
+%     predictionValues = struct('wWG', 0.8e-6, 'dSlot', 0.1e-6); 
+%     predictionNames = fieldnames(predictionValues); 
+%     for idx_prediction = 1:length(predictionNames)
+%         name = predictionNames{idx_prediction};
+%         value = comsol_parameters(1).(name);
+%         unit = comsol_parameters(2).(name); 
+%         if strcmp(unit, '[nm]')
+%             factor = 1e-9; 
+%         elseif strcmp(unit, '[um]')
+%             factor = 1e-6; 
+%         elseif strcmp(unit, '[mm]')
+%             factor = 1e-3; 
+%         else
+%             factor = 1; 
+%         end
+%         predictionValues(name) = value*factor; 
+%     end
+%     prediction = 1.206e6*predictionValues.wWG - 1.2e6*predictionValues.dSlot + 1.9606; 
+    % Setup Material - Input wavelength is given in nm input arguments is wl*1e9.
 	% I) Analytic (sellmaier, lorentz, drude etc,) defined by model parameters
 	model.func.create('Graphene', 'Analytic');
 	model.func('Graphene').active(true);
@@ -158,7 +176,7 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
             interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
             interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
             interpDummy.set('source', 'file');
-            interpDummy.set('filename', [library_path '\DataIn\' str_file]);
+            interpDummy.set('filename', [library_path '/DataIn/' str_file]);
             interpDummy.set('extrap', 'linear');
             interpDummy = [];
         else
