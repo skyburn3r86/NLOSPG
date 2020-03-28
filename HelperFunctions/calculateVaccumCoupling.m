@@ -165,12 +165,15 @@ function results = calculateVaccumCoupling(model, varargin)
         % Fiorentino, M. et al. (2007). Spontaneous parametric down-conversion in periodically poled KTP waveguides and bulk crystals. Optics Express, 15(12), 7479. 
         % General Quantum Optics theory is described well in Grynberg, G. (2012). Quantization of free radiation. In Introduction to Quantum Optics (pp. 301?324).
         try
-            % 1a. Extracting Fields
+            % 1a. Calculating the vacuum coupling rate.
             g0 = overlap_Internal(model, 'nr_solution', nr_solution, 'active_material', active_domain, 'OuterSolNums', OuterSolNums);
             results(1).str = 'g_0';
             results(1).unit = '[2pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
             results(1).value = g0 ;
             
+            % Calculating the group refractive inidices, as indicated by
+            % chris. 
+            % Group velocity in lossy periodic structured media - https://journals.aps.org/pra/pdf/10.1103/PhysRevA.82.053825
             Energy = mphint2(model,...
                 '(eps0*(ewfd.nxx^2*abs(ewfd.Ex)^2+ewfd.nyy^2*abs(ewfd.Ey)^2+ewfd.nzz^2*abs(ewfd.Ez)^2))',...
                 'surface', 'dataset', 'dset2', 'outersolnum', OuterSolNums(1), 'solnum', nr_solution(1));

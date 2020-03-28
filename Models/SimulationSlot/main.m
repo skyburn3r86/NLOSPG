@@ -20,7 +20,7 @@ global old_neff
 
 old_neff = 2.18; 
 old_Ep = 0; 
-
+hWG = 220; 
 [param_list] = combParameterSweep(para_sweep);
 
 for idx_param_list = 1:size(param_list.values,1)
@@ -30,7 +30,7 @@ for idx_param_list = 1:size(param_list.values,1)
 
     % ModelSetup_Parameters - init Model and defines parameters    
     [comsol_model, materials, sim_parameters] = ModelSetup_Parameters(param_list, idx_param_list,...
-        'n_start', {old_neff, ' '}, 'hWG', {340, '[nm]'});
+        'n_start', {old_neff, ' '}, 'hWG', {hWG, '[nm]'});
     
     % setup model
     comsol_model = Geometry(comsol_model, materials);
@@ -57,6 +57,6 @@ for idx_param_list = 1:size(param_list.values,1)
     end
     sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str);
 end
-JsonName = ['./Results/Data__hWG-' num2str(hWGA(idx_hWG)) 'nm_Mode-' num2str(idx_Mode) '.json'];
+JsonName = ['./Results/Data__hWG-' num2str(hWG) 'nm_Mode20.json'];
 writeToJson(param_list, sim_results, JsonName); 
 
