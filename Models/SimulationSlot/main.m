@@ -18,9 +18,9 @@ para_sweep{3}.unit = '[m]';
 global old_Ep
 global old_neff
 
-old_neff = 2.07; 
+old_neff = 2.334; 
 old_Ep = 0; 
-hWG = 220; 
+hWG = 340; 
 [param_list] = combParameterSweep(para_sweep);
 
 for idx_param_list = 1:size(param_list.values,1)
