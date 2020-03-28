@@ -6,7 +6,7 @@ initPaths(modelpath);
 
 
 para_sweep{1}.values = linspace(100, 200, 3)*1e-9;
-para_sweep{1}.str = 'hWG';
+para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
 para_sweep{2}.values = linspace(25, 125, 5)*1e-9; 
 para_sweep{2}.str = 'dSlot';
@@ -18,7 +18,7 @@ para_sweep{3}.unit = '[m]';
 global old_Ep
 global old_neff
 
-old_neff = 2.18; 
+old_neff = 2.07; 
 old_Ep = 0; 
 hWG = 220; 
 [param_list] = combParameterSweep(para_sweep);
