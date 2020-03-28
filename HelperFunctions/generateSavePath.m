@@ -22,8 +22,9 @@ function save_path =  generateSavePath(para_sweep)
         end
     end
     save_path = strrep(save_path , '.', 'pt');
+    
     % generating folder
-    [status, msg, msgID] = mkdir(['./Results\' save_path]);
+    [status, msg, msgID] = mkdir(['./Results/' save_path]);
     % check if folder already exist. if true ask user if override should be
     % performed
     if strcmp(msg,'Directory already exists.')
@@ -32,7 +33,7 @@ function save_path =  generateSavePath(para_sweep)
         dims = [1 length(save_path)+20];
         definput = {save_path};
         save_path = inputdlg(prompt,title,dims,definput); % cancel will return empty str
-        [status, msg, msgID] = mkdir(['./Results\' save_path{1}]);
+        [status, msg, msgID] = mkdir(['./Results/' save_path{1}]);
     end
     % transforming cell to string
     save_path = string(save_path);

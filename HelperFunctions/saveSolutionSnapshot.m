@@ -49,7 +49,7 @@ function saveSolutionSnapshot(model, varargin)
          
 
         % generating folder
-        [status, msg, msgID] = mkdir(['./Results\' path_str '\FieldProfiles\']);
+        [status, msg, msgID] = mkdir([path_str]);
         
         %% extract fields
         temp = mpheval(model, expression, 'dataset', dset, 'outersolnum', outerSol, 'solnum', nr_solution);
