@@ -12,13 +12,13 @@ initPaths(modelpath);
 para_sweep{1}.values = linspace(10, 300, 16)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(150, 450, 7)*1e-9;
+para_sweep{2}.values = linspace(350, 350, 1)*1e-9;
 para_sweep{2}.str = 'hWG';
 para_sweep{2}.unit = '[m]';
 para_sweep{3}.values = linspace(1550, 1550, 1)*1e-9;
 para_sweep{3}.str = 'wl';
 para_sweep{3}.unit = '[m]';
-para_sweep{4}.values = linspace(300, 900, 2)*1e-9;
+para_sweep{4}.values = linspace(300, 300, 1)*1e-9;
 para_sweep{4}.str = 'wWG';
 para_sweep{4}.unit = '[m]';
 
