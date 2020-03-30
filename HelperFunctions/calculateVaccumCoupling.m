@@ -166,7 +166,15 @@ function results = calculateVaccumCoupling(model, varargin)
         % General Quantum Optics theory is described well in Grynberg, G. (2012). Quantization of free radiation. In Introduction to Quantum Optics (pp. 301?324).
         try
             % 1a. Calculating the vacuum coupling rate.
-            g0 = overlap_Internal(model, 'nr_solution', nr_solution, 'active_material', active_domain, 'OuterSolNums', OuterSolNums);
+            % Extract Phases.
+
+            phaseP = PhaseExtraction(model, 'expression', 'ewfd.Ex', 'active_material', active_domain, ...
+                    'nr_solution', nr_solution(1), 'OuterSolNums', OuterSolNums(1), 'dset', 'dset2', 'exclude_adj', 'Air');
+            phaseS = PhaseExtraction(model, 'expression', 'ewfd.Ex', 'active_material', active_domain, ...
+                    'nr_solution', nr_solution(1), 'OuterSolNums', OuterSolNums(1), 'dset', 'dset2', 'exclude_adj', 'Air');
+
+            g0 = overlap_Internal(model, 'nr_solution', nr_solution, 'active_material', active_domain, ...
+                    'OuterSolNums', OuterSolNums, 'phases', [phaseP, phaseS]);
             results(1).str = 'g_0';
             results(1).unit = '[2pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
             results(1).value = g0 ;
