@@ -58,7 +58,14 @@ for list_loop = 1:2:length(varargin)-1
                         para{idx_para_str}.str = cell_param.str{idx_para_str};
                     end
                 end
-            case 'para_values'
+                
+            case 'para_unit'
+                cell_param.unit = varargin{list_loop+1};
+                for idx_para_str = 1:length(cell_param.unit)
+                        % saves the parameter name
+                        para{idx_para_str}.unit = cell_param.unit{idx_para_str};
+                end
+            case 'para_value'
                 cell_param.values = varargin{list_loop+1};
                 for idx_para_str = 1:length( cell_param.str)
                     % uses default parameter value if not defined = empty
@@ -114,48 +121,8 @@ for idx_row_list = 1:length(list_vector)
     end
 end
 clear counter;
-% 1D plot if second argument has less then 5 values
-if length(para) == 1
-        % searching for all list values callculated for para1.value and para2.value
-        for idx_para1 = 1:length(para{1}.values)
-            para_1_value = para{1}.values(idx_para1);
-            dummy_value = [];
-            for idx_list_loop = 1:length(para_plot)
-                rel_error = abs((para_1_value - para_plot(idx_list_loop,colm_in_para_list(1)))./para_plot(idx_list_loop,colm_in_para_list(1)));
-                if ~isempty(find(rel_error < 1e-3))
-                    if strcmp(data_FOM.str, 'max')
-                        if ~isempty(dummy_value)
-                            dummy_value = max(data_plot(idx_list_loop), dummy_value);
-                        else
-                            dummy_value = data_plot(idx_list_loop);
-                        end
-                    elseif strcmp(data_FOM.str, 'min')
-                        if ~isempty(dummy_value)
-                            dummy_value = min(data_plot(idx_list_loop), dummy_value);
-                        else
-                            dummy_value = data_plot(idx_list_loop);
-                        end
-                    end
-                end
-            end
-            dataY(idx_para1) = dummy_value;
-        end
-        dataX = para{1}.values;
-        % generating 1D plot
-        figure;
-        %     'to do' add linear plot
-        plot(dataX, dataY);
-        title(strrep([ str_data ' ' str_unit],'_',' '));
-        xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
-        ylabel(strrep([ str_data ' ' str_unit],'_',' '));
-        if exist('save_path')
-            % to do add save_folder
-            saveas(gcf, [save_path strrep([ str_data ' ' str_unit],'_',' ') '.jpeg']);
-            saveas(gcf, [save_path strrep([ str_data ' ' str_unit],'_',' ') '.fig']);
-        end
-else
-    %2D plot 
-    for idx_para1 = 1:length(para{1}.values)
+% reshaping data from list into matrix
+ for idx_para1 = 1:length(para{1}.values)
         para_1_value = para{1}.values(idx_para1);
         for idx_para2 = 1:length(para{2}.values)
             para_2_value = para{2}.values(idx_para2);
@@ -185,7 +152,49 @@ else
             end
         dataZ(idx_para2,idx_para1) = dummy_value;
         end
-    end
+ end
+% 1D plot if second argument has less then 5 values
+if length(para{2}) < 5
+        dataX = para{1}.values;
+        dataY = dataZ;
+        % labeling corresponding to the secon d parameter
+        label_str = {};
+        for jj = 1:length(para{2}.values)
+                label_str{jj} = strrep([ para{2}.str '_' num2str(para{2}.values(jj)) '' para{2}.unit],'_',' ');
+        end                
+        save_str = [strrep([ str_data ' ' str_unit],'_',' ')];
+        save_str = [strrep([ str_data ' ' str_unit],'\',' ')];
+        for jj = 3:length(para)
+            if length(para{jj}.values) > 1
+                save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) '-' num2str(max(para{jj}.values)) ']'];
+            else
+                save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) ']'];
+            end
+        end
+        
+        % generating 1D plot
+        figure('Name', str_data);       
+        colors_marker = winter(size(dataY,1)+1);        
+        fontsize =9;
+        markersize =8;
+        linewidth = 1.25;
+        colors = lines(2);
+        for jj = 1:size(dataY,1)
+            plot(dataX, dataY(jj,:)...
+                , 'x--', 'MarkerSize',  markersize, 'Linewidth', linewidth, 'Color', colors_marker(jj,:))
+            hold on
+        end
+        xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
+        ylabel(strrep([ str_data ' ' str_unit],'_',' '));
+        title(save_str);
+        legend(label_str)        
+        if exist('save_path')
+            save_str = [save_path strrep(save_str,'.','pt')];
+            saveas(gcf, [save_str '.jpeg']);
+            saveas(gcf, [save_str '.fig']);
+        end    
+% 2D plot        
+else
     dataX = para{1}.values;
     dataY = para{2}.values;
     % generating 1D plot
