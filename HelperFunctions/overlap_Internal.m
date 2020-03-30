@@ -41,7 +41,7 @@ function [g0] = overlap_Internal(model, varargin)
                 objects = mphgetselection(model.selection(['geom1_' active_domain '_dom']));
                 interactive_domain = objects.entities;
             case 'phases'
-                phi = varargin{ii+1};
+                phases = varargin{ii+1};
             case 'OuterSolNums'
                 OuterSolNums = varargin{ii+1};
             case 'nr_solution'
@@ -77,7 +77,7 @@ function [g0] = overlap_Internal(model, varargin)
     model.result().dataset("join1").set("outersolnum2", OuterSolNums(2));
     model.result().dataset("join1").set("solnum2", nr_solution(2));
     model.result().dataset("join1").set("method", "general");
-    command = ['exp(-i*', num2str(phases(1)), ')*data1*conj(exp(-i*', num2str(phases(2)), ')*data2)*conj(exp(-i*', num2str(phases(2)), ')*data2)'];
+    command = ['exp(i*(', num2str(phases(1)), '))*data1*conj(exp(i*(', num2str(phases(2)), '))*data2)*conj(exp(i*(', num2str(phases(2)), '))*data2)'];
     model.result().dataset("join1").set("expr", command);
     
     % Calculating the overlap integral. Since everywhere except the active
