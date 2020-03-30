@@ -57,9 +57,32 @@ function simulation_results = comsolEvaluation(model, simulation_parameters, mat
         end
     end
     % plotting and saving modes
+    
+    % if no prior field has been calculated, do comparison with neff
+    global old_Ep        
     global old_neff
-    [~, I] = min(abs(neffTE{1} - old_neff)); 
+    
+    % Checking if the Simulation is the first one. If it is, compare with
+    % the effective refractive index and read the intial field. If it is
+    % not, compare the overlaps with the existing fields.
+    if ~isa(old_Ep, 'ClassicalField')
+        [~, I] = min(abs(neffTE{1} - old_neff)); 
+        [~, old_Ep] = overlapFields(model, old_Ep, 'dset', 'dset2', 'N', 200, 'OuterSolNums', 1, 'SolNums', nr_solutionTE{1}(I));
+    else
+        overlap = zeros(1, length(nr_solutionTE{1})); 
+        field = cell(1, length(nr_solutionTE{1})); 
+        for idx_mode_TE = 1:length(nr_solutionTE{1})
+           [overlap(idx_mode_TE), field{idx_mode_TE}] = overlapFields(model, old_Ep, 'dset', 'dset2', 'OuterSolNums', 1, 'N', 200, 'SolNums', nr_solutionTE{1}(idx_mode_TE)); 
+        end
+       [m, I] = max(overlap); 
+       if m < 0.5
+           % TODO: Implement trying further to correct the overlap
+          disp('Warning:    overlap smaller than 50%!');
+       end
+       old_Ep = field{I};        
+    end
     old_neff = neffTE{1}(I); 
+    
     
     % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode
    simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEO', ...

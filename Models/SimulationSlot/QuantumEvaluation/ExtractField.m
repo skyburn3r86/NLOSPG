@@ -41,7 +41,7 @@ function [Ep, Es, Ei] = ExtractField(model, varargin)
         cordsz = temp.('p');
 
         temp = mpheval(model, 'ewfd.Hx', 'dataset', 'dset2', 'outersolnum', iter, 'solnum', SolNums(ii));
-        Hx = temp.('d1');
+        Hx = temp.('d1');/
         cordsvx = temp.('p');
 
         temp = mpheval(model, 'ewfd.Hy', 'dataset', 'dset2', 'outersolnum', iter, 'solnum', SolNums(ii));

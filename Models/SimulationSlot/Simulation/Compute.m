@@ -44,7 +44,7 @@ function [model] = Compute(model,varargin)
     model.study('std1').feature('mode').set('shiftactive', true);
     global old_neff
     if strcmp(options(1).('mat'), 'Si')
-        model.study('std1').feature('mode').set('shift', num2str(old_neff));
+        model.study('std1').feature('mode').set('shift', num2str(old_neff+0.05));
     elseif strcmp(options(1).('mat'), 'SiNx')
         model.study('std1').feature('mode').set('shift', num2str(old_neff));
     end

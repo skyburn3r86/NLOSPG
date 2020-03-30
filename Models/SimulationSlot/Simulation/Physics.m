@@ -20,7 +20,7 @@ function [model] = Physics(model, varargin)
     model.component('comp1').physics('ewfd').create('sctr1', 'Scattering', 1);
     % define here materials that touch the scattering boundary. Edges of this materail that
     % are not in contact with the simulation box are ignored.
-    material_scattering = {'Substrate', 'OEO'};
+    material_scattering = {'Substrate', 'OEO', 'Air'};
     selection = [];
     for jj = 1:length(material_scattering)
         object = mphgetselection(model.selection(['geom1_' material_scattering{jj} '_bnd']));

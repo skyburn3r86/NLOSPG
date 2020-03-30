@@ -49,7 +49,7 @@ function saveSolutionSnapshot(model, varargin)
          
 
         % generating folder
-        [status, msg, msgID] = mkdir(['./Results\' path_str '\FieldProfiles\']);
+        [status, msg, msgID] = mkdir([path_str]);
         
         %% extract fields
         temp = mpheval(model, expression, 'dataset', dset, 'outersolnum', outerSol, 'solnum', nr_solution);
@@ -94,6 +94,6 @@ function saveSolutionSnapshot(model, varargin)
         xlabel('x index [um]');
         ylabel('y index [um]');
         title(strrep(title_str,'_', ' '));
-        saveas(gcf, ['./Results\' path_str '\FieldProfiles\' title_str '.jpeg']);  
+        saveas(gcf, [path_str  title_str '.jpeg']);  
         close all
 end
