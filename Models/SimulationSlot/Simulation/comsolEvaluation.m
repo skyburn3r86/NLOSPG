@@ -3,7 +3,7 @@
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
     
-function simulation_results = comsolEvaluation(model, simulation_parameters, materials, varargin)
+function [simulation_results, mode_results] = comsolEvaluation(model, simulation_parameters, materials, varargin)
 %EVALUATION Evaluates the Simulation and can be adapted to your individual
 %style 
 %OUPUT: simulaiton_results - structure value feautring 1D array, str name of
@@ -83,6 +83,13 @@ function simulation_results = comsolEvaluation(model, simulation_parameters, mat
     end
     old_neff = neffTE{1}(I); 
     
+    mode_results = struct();
+    mode_results(1).str = 'TE';
+    mode_results(1).value = neffTE; 
+    mode_results(1).unit = '[a.u.]';
+    mode_results(2).str = 'TM'; 
+    mode_results(2).value = neffTM; 
+    mode_results(2).unit = '[a.u.]';
     
     % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode
    simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEO', ...
