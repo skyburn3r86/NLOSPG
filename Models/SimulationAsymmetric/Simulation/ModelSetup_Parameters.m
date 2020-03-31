@@ -34,6 +34,7 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
         'hOEO', {50, '[nm]'},...
         'hcladding', {2000, '[nm]'},...
         'r33', {137, '[pm/V]'}, ...
+        'r', {0.5, ''}, ...
         'lmin', {1100, '[nm]'}, ...
         'lmax', {2300, '[nm]'}, ...
         'Nl', {25, ' '}, ...
@@ -122,7 +123,7 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
 
     model = ModelUtil.create('Model');
     model.modelPath(pwd);
-    model.label('OEO_Slot.mph');
+    model.label('Asymmetric_Slot.mph');
     
 
     % Set Model Parameters
@@ -137,24 +138,7 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
     end
     model.component.create('comp1', true);	
     
-%     predictionValues = struct('wWG', 0.8e-6, 'dSlot', 0.1e-6); 
-%     predictionNames = fieldnames(predictionValues); 
-%     for idx_prediction = 1:length(predictionNames)
-%         name = predictionNames{idx_prediction};
-%         value = comsol_parameters(1).(name);
-%         unit = comsol_parameters(2).(name); 
-%         if strcmp(unit, '[nm]')
-%             factor = 1e-9; 
-%         elseif strcmp(unit, '[um]')
-%             factor = 1e-6; 
-%         elseif strcmp(unit, '[mm]')
-%             factor = 1e-3; 
-%         else
-%             factor = 1; 
-%         end
-%         predictionValues(name) = value*factor; 
-%     end
-%     prediction = 1.206e6*predictionValues.wWG - 1.2e6*predictionValues.dSlot + 1.9606; 
+
     % Setup Material - Input wavelength is given in nm input arguments is wl*1e9.
 	% I) Analytic (sellmaier, lorentz, drude etc,) defined by model parameters
 	model.func.create('Graphene', 'Analytic');
