@@ -27,8 +27,10 @@ function [model] = Physics(model, varargin)
         selection = [selection object.entities];
     end
     % selection cross-check via
-    figure(1)
-    mphgeom(model, 'geom1', 'Edgelabels', 'on');
+    if 0
+        figure(1)
+        mphgeom(model, 'geom1', 'Edgelabels', 'on');
+    end
     model.component('comp1').physics('ewfd').feature('sctr1').selection.set(selection);
 
     % Add Graphene (Kubo Formulism)

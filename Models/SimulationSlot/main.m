@@ -11,16 +11,17 @@ para_sweep{1}.unit = '[m]';
 para_sweep{2}.values = linspace(25, 125, 5)*1e-9; 
 para_sweep{2}.str = 'dSlot';
 para_sweep{2}.unit = '[m]';
-para_sweep{3}.values = linspace(450, 800, (800-450)/25 + 1)*1e-9;
+para_sweep{3}.values = linspace(450, 800, (800-450)/50 + 1)*1e-9;
 para_sweep{3}.str = 'wWG';
 para_sweep{3}.unit = '[m]';
 
 global old_Ep
 global old_neff
 
-old_neff = 2.334; 
+old_neff = 2.07; 
 old_Ep = 0; 
-hWG = 340; 
+hWG = 220; 
+
 [param_list] = combParameterSweep(para_sweep);
 
 for idx_param_list = 1:size(param_list.values,1)
