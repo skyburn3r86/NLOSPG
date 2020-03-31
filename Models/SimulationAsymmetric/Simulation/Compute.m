@@ -7,10 +7,10 @@ function [model] = Compute(model,varargin)
 %COMPUTE Starts the Computation of the Model in this function. Takes the
 %model as argument and can be given the 'mat' as parameter. Si and SiNx
 %implemented
-
+    global old_neff
     options = struct(...
             'mat', 'Si', ...
-            'wl', {[770, 775, 780, 1545, 1550, 1555], '[nm]'});
+            'wl', {[1310,2620], '[nm]'});
 
     optionNames=fieldnames(options);
 
@@ -44,9 +44,9 @@ function [model] = Compute(model,varargin)
     model.study('std1').feature('mode').set('modeFreq', 'c_const/wl');
     model.study('std1').feature('mode').set('shiftactive', true);
     if strcmp(options(1).('mat'), 'Si')
-        model.study('std1').feature('mode').set('shift', '3.2');
+        model.study('std1').feature('mode').set('shift', num2str(old_neff+0.05));
     elseif strcmp(options(1).('mat'), 'SiNx')
-        model.study('std1').feature('mode').set('shift', '2.0');
+        model.study('std1').feature('mode').set('shift', num2str(old_neff));
     end
     % Generate the string of relevant wavelengths
     lambdas = ''; 
