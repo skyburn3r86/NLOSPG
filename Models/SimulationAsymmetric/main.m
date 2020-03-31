@@ -18,7 +18,7 @@ para_sweep{3}.unit = '[m]';
 global old_Ep
 global old_neff
 
-old_neff = 1.8251; 
+old_neff = 1.75; 
 old_Ep = 0; 
 hWG = 340; 
 
