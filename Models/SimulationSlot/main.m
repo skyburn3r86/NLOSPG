@@ -6,12 +6,15 @@ initPaths(modelpath);
 
 
 para_sweep{1}.values = linspace(100, 200, 3)*1e-9;
+para_sweep{1}.values = 100*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
 para_sweep{2}.values = linspace(25, 125, 5)*1e-9; 
+para_sweep{2}.values = 25*1e-9; 
 para_sweep{2}.str = 'dSlot';
 para_sweep{2}.unit = '[m]';
 para_sweep{3}.values = linspace(450, 800, (800-450)/50 + 1)*1e-9;
+para_sweep{3}.values = linspace(500, 800, (800-450)/100 + 1)*1e-9;
 para_sweep{3}.str = 'wWG';
 para_sweep{3}.unit = '[m]';
 
@@ -56,8 +59,9 @@ for idx_param_list = 1:size(param_list.values,1)
     if 0
         mphsave(comsol_model, ['./ComsolModels/' save_str '.mph']);
     end
-    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str);
+    [sim_results{idx_param_list,1}, mode_results{idx_param_list, 1}] = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str);
 end
 JsonName = ['./Results/Data__hWG-' num2str(hWG) 'nm_Mode20.json'];
-writeToJson(param_list, sim_results, JsonName); 
-
+writeToJson(param_list, sim_results, JsonName, 'model', comsol_model); 
+JsonName = ['./Results/Modes__hWG-' num2str(hWG) 'nm_Mode20.json'];
+writeToJson(param_list, mode_results, JsonName, 'model', comsol_model, 'sollabels', {'wl_1310_', 'wl_2620_'}); 
