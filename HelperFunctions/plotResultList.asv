@@ -153,13 +153,11 @@ clear counter;
         dataZ(idx_para2,idx_para1) = dummy_value;
         end
  end
- 
- paper_size = [5 5 6 5.5];
- % 1D plot if second argument has less then 5 values
- if length(para{2}) < 5
-     dataX = para{1}.values;
-     dataY = dataZ;
-     % labeling corresponding to the secon d parameter
+% 1D plot if second argument has less then 5 values
+if length(para{2}) < 5
+        dataX = para{1}.values;
+        dataY = dataZ;
+        % labeling corresponding to the secon d parameter
         label_str = {};
         for jj = 1:length(para{2}.values)
                 label_str{jj} = strrep([ para{2}.str '_' num2str(para{2}.values(jj)) '' para{2}.unit],'_',' ');
@@ -174,8 +172,10 @@ clear counter;
             end
         end
         
-        % generating 1D plot       
-        figure('Name', str_data, 'Units', 'centimeters', 'Position', paper_size);
+        % generating 1D plot
+        
+        paper_size = [0 0 6 5.5];
+        figure('Name', str_data, 'Position', []);
         colors_marker = winter(size(dataY,1)+1);        
         fontsize =9;
         markersize =8;
@@ -189,8 +189,7 @@ clear counter;
         xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
         ylabel(strrep([ str_data ' ' str_unit],'_',' '));
         title(save_str);
-%         legend(label_str); 
-        grid on;       
+        legend(label_str)        
         if exist('save_path')
             save_str = [save_path strrep(save_str,'.','pt')];
             saveas(gcf, [save_str '.jpeg']);
@@ -200,8 +199,7 @@ clear counter;
 else
     dataX = para{1}.values;
     dataY = para{2}.values;
-    % generating 1D plot   
-    figure('Name', str_data, 'Units', 'centimeters', 'Position', paper_size);
+    % generating 1D plot
     figure
     surface(dataX, dataY, real(dataZ));
     colorbar;

@@ -12,7 +12,7 @@ initPaths(modelpath);
 para_sweep{1}.values = linspace(10, 300, 16)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(200, 400, 11)*1e-9;
+para_sweep{2}.values = linspace(200, 400, 6)*1e-9;
 para_sweep{2}.str = 'hWG_photonic';
 para_sweep{2}.unit = '[m]';
 para_sweep{3}.values = linspace(1300, 1600, 2)*1e-9;
@@ -59,7 +59,7 @@ for idx_param_list = 1:size(param_list.values,1)
         catch
         end
     end
-    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', file_str, 'path', save_folder);   
+    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', file_str, 'path', ['./Results/' save_folder]);   
 end
 
 %% Saving results as jason files -> move to seperate function!
