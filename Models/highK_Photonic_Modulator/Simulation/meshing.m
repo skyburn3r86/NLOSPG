@@ -38,7 +38,7 @@ function [model] = meshing(model, varargin)
                 xscale = 1;
                 yscale = 1;
             elseif ~isempty(strfind(lower(materialNames{jj}), 'electrodes')) || ~isempty(strfind(lower(materialNames{jj}), 'metalrough'))
-                meshsize = 'wl/10';                
+                meshsize = 'wl/20';                
                 xscale = 1;
                 yscale = 1;
             elseif ~isempty(strfind(lower(materialNames{jj}), 'substrate')) || ~isempty(strfind(lower(materialNames{jj}), 'cladding'))

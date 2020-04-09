@@ -27,7 +27,6 @@ function [model] = meshing(model, varargin)
     % reverse sweep direction to give high priority of meshing for later material
     for jj = length(materialNames):-1:1
         % checks if material properties are defined by txt file
-       
         if ~isempty(strfind(materials.(materialNames{jj}), '.txt'))
             % check if plasmonic waveguide 
             if ~isempty(strfind(lower(materialNames{jj}), 'metalfine'))

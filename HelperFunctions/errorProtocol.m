@@ -13,7 +13,7 @@ function errorProtocol(save_folder, error_at_parameter_str, error_comment_str)
 
  
 % open file
-    fileID = fopen(['./Results/' save_folder '\error_protocol.txt'], 'a+');
+    fileID = fopen(['./' save_folder '/error_protocol.txt'], 'a+');
     timestemp = datetime('now');
     fprintf(fileID, [datestr(timestemp) '\n']);
     fprintf(fileID, [error_at_parameter_str '\n']);
