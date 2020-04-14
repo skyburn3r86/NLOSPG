@@ -74,7 +74,7 @@ function [model] = Compute(model,varargin)
     model.sol('sol1').create('v1', 'Variables');
     model.sol('sol1').feature('v1').set('control', 'mode');
     model.sol('sol1').create('e1', 'Eigenvalue');
-    model.sol('sol1').feature('e1').set('neigs', 6);
+    model.sol('sol1').feature('e1').set('neigs', 10);
     model.sol('sol1').feature('e1').set('shift', '1');
     model.sol('sol1').feature('e1').set('control', 'mode');
     model.sol('sol1').feature('e1').feature('aDef').set('complexfun', true);

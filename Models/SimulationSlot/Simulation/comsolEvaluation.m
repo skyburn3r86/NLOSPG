@@ -75,9 +75,23 @@ function [simulation_results, mode_results] = comsolEvaluation(model, simulation
            [overlap(idx_mode_TE), field{idx_mode_TE}] = overlapFields(model, old_Ep, 'dset', 'dset2', 'OuterSolNums', 1, 'N', 200, 'SolNums', nr_solutionTE{1}(idx_mode_TE)); 
         end
        [m, I] = max(overlap); 
-       if m < 0.5
+        if m < 0.5
            % TODO: Implement trying further to correct the overlap
-          disp('Warning:    overlap smaller than 50%!');
+            disp('Warning:    overlap smaller than 50%! Keeping old mode as reference');
+            mphsave(model); 
+            neffStr = ''; 
+            for idx_mode = 1:length(nr_solutionTE{1})
+               neffStr = [neffStr num2str(idx_mode) ': ' num2str(real(neffTE{1}(idx_mode)), 4) ';  '];
+            end
+            prompt = {['Overlap not clear. Please select the correct mode! ' neffStr]};
+            dims = [1 length(prompt{1})];
+            title = 'Sim Index';
+            definput = {'1'};
+            I = inputdlg(prompt,title,dims,definput); % cancel will return empty str
+            I = str2num(I{1}); 
+            old_Ep = field{I};  
+        else
+           old_Ep = field{I};  
        end
        old_Ep = field{I};        
     end
