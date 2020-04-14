@@ -61,25 +61,66 @@ function [simulation_results, mode_results] = comsolEvaluation(model, simulation
     % if no prior field has been calculated, do comparison with neff
     global old_Ep        
     global old_neff
-    
+    algo = 2;       % 1: Exclusion principle. Requires Knowledge about the dispersion relation
+                    % 2: Field Overlaps. Should be reliable, but does not
+
     % Checking if the Simulation is the first one. If it is, compare with
     % the effective refractive index and read the intial field. If it is
     % not, compare the overlaps with the existing fields.
-    if ~isa(old_Ep, 'ClassicalField')
-        [~, I] = min(abs(neffTE{1} - old_neff)); 
-        [~, old_Ep] = overlapFields(model, old_Ep, 'dset', 'dset2', 'N', 200, 'OuterSolNums', 1, 'SolNums', nr_solutionTE{1}(I));
-    else
-        overlap = zeros(1, length(nr_solutionTE{1})); 
-        field = cell(1, length(nr_solutionTE{1})); 
-        for idx_mode_TE = 1:length(nr_solutionTE{1})
-           [overlap(idx_mode_TE), field{idx_mode_TE}] = overlapFields(model, old_Ep, 'dset', 'dset2', 'OuterSolNums', 1, 'N', 200, 'SolNums', nr_solutionTE{1}(idx_mode_TE)); 
+    if algo == 2
+        if ~isa(old_Ep, 'ClassicalField')
+            [~, I] = min(abs(neffTE{1} - old_neff)); 
+            [~, old_Ep] = overlapFields(model, old_Ep, 'dset', 'dset2', 'N', 200, 'OuterSolNums', 1, 'SolNums', nr_solutionTE{1}(I));
+        else
+            overlap = zeros(1, length(nr_solutionTE{1})); 
+            field = cell(1, length(nr_solutionTE{1})); 
+            for idx_mode_TE = 1:length(nr_solutionTE{1})
+               [overlap(idx_mode_TE), field{idx_mode_TE}] = overlapFields(model, old_Ep, 'dset', 'dset2', 'OuterSolNums', 1, 'N', 200, 'SolNums', nr_solutionTE{1}(idx_mode_TE)); 
+            end
+           [m, I] = max(overlap); 
+            if m < 0.5
+               % TODO: Implement trying further to correct the overlap
+                disp('Warning:    overlap smaller than 50%! Keeping old mode as reference');
+                mphsave(model); 
+                neffStr = ''; 
+                for idx_mode = 1:length(nr_solutionTE{1})
+                   neffStr = [neffStr num2str(idx_mode) ': ' num2str(real(neffTE{1}(idx_mode)), 4) ';  '];
+                end
+                prompt = {['Overlap not clear. Please select the correct mode! ' neffStr]};
+                dims = [1 length(prompt{1})];
+                title = 'Sim Index';
+                definput = {'1'};
+                I = inputdlg(prompt,title,dims,definput); % cancel will return empty str
+                I = str2num(I{1}); 
+                old_Ep = field{I};  
+            else
+               old_Ep = field{I};   
+           end
         end
-       [m, I] = max(overlap); 
-       if m < 0.5
-           % TODO: Implement trying further to correct the overlap
-          disp('Warning:    overlap smaller than 50%!');
-       end
-       old_Ep = field{I};        
+    elseif algo == 1
+        wWG = char(model.param.get('wWG'));
+        if contains(wWG, '[um]')
+            wWG = str2num(erase(wWG, ' [um]'))*1e-6;
+        elseif contains(wWG, '[nm]')
+            wWG = str2num(erase(wWG, ' [nm]'))*1e-9;
+        elseif contains(wWG, '[m]')
+            wWG = str2num(erase(wWG, ' [m]'));
+        else
+            error('wWG: Unit not recognized')
+        end
+        m = (2.559 - 1.608)/(1200e-9 - 700e-9); 
+        y0 = 1.95;
+        x0 = 700e-9;
+        b = -m*x0 + y0; 
+        nUpper = m*wWG + b;
+        idx_mode = (neffTE{1} < nUpper);  % For asymmetric mode; 2nd Order mode always smaller than 2
+        neffTE{1} = neffTE{1}(idx_mode); 
+        if length(neffTE{1}) > 1
+           I = 2;  
+        else
+            I = 1; 
+        end
+        
     end
     old_neff = neffTE{1}(I); 
     

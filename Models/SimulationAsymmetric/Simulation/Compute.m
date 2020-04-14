@@ -44,7 +44,7 @@ function [model] = Compute(model,varargin)
     model.study('std1').feature('mode').set('modeFreq', 'c_const/wl');
     model.study('std1').feature('mode').set('shiftactive', true);
     if strcmp(options(1).('mat'), 'Si')
-        model.study('std1').feature('mode').set('shift', num2str(old_neff+0.2));
+        model.study('std1').feature('mode').set('shift', num2str(old_neff+0.3));
     elseif strcmp(options(1).('mat'), 'SiNx')
         model.study('std1').feature('mode').set('shift', num2str(old_neff));
     end
@@ -74,7 +74,7 @@ function [model] = Compute(model,varargin)
     model.sol('sol1').create('v1', 'Variables');
     model.sol('sol1').feature('v1').set('control', 'mode');
     model.sol('sol1').create('e1', 'Eigenvalue');
-    model.sol('sol1').feature('e1').set('neigs', 6);
+    model.sol('sol1').feature('e1').set('neigs', 10);
     model.sol('sol1').feature('e1').set('shift', '1');
     model.sol('sol1').feature('e1').set('control', 'mode');
     model.sol('sol1').feature('e1').feature('aDef').set('complexfun', true);
