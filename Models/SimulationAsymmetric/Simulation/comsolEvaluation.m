@@ -35,7 +35,7 @@ function [simulation_results, mode_results] = comsolEvaluation(model, simulation
         
     % finding modes
     [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,...
-        'deltaN_threshold', 0.03, 'polarization_threshold', 0.5, 'OuterSolNum', [1, 2]);
+        'deltaN_threshold', -0.01, 'polarization_threshold', 0.5, 'OuterSolNum', [1, 2]);
     
     if isa(neffTE, 'cell')
         OuterSolNum = [1, 2]; 
