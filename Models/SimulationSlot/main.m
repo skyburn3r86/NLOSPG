@@ -18,9 +18,9 @@ para_sweep{1}.unit = '[m]';
 global old_Ep
 global old_neff
 
-old_neff = 2.7414; 
+old_neff = 1.5671; 
 old_Ep = 0; 
-hWG = 340; 
+hWG = 800; 
 
 [param_list] = combParameterSweep(para_sweep);
 
@@ -56,7 +56,7 @@ for idx_param_list = 1:size(param_list.values,1)
     if 1
         mphsave(comsol_model, ['./ComsolModels/' save_str '.mph']);
     end
-    [sim_results{idx_param_list,1}, mode_results{idx_param_list, 1}] = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str);
+    [sim_results{idx_param_list,1}, mode_results{idx_param_list, 1}] = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', save_str, 'expression', 'real(-i*ewfd.Ex)');
 end
 JsonName = ['./Results/Data__hWG-' num2str(hWG) 'nm_Mode10.json'];
 writeToJson(param_list, sim_results, JsonName, 'model', comsol_model); 
