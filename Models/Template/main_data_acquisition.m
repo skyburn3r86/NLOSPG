@@ -9,16 +9,16 @@ initPaths(modelpath);
 
 % Note, defaults value are set in ModelSetup_Parameters
 % Sweep parameters. String has to match parameter name of the comsol model 
-para_sweep{1}.values = linspace(10, 300, 16)*1e-9;
+para_sweep{1}.values = linspace(30, 300, 16)*1e-9;
 para_sweep{1}.str = 'hOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(350, 350, 1)*1e-9;
+para_sweep{2}.values = linspace(300, 300, 3)*1e-9;
 para_sweep{2}.str = 'hWG';
 para_sweep{2}.unit = '[m]';
 para_sweep{3}.values = linspace(1550, 1550, 1)*1e-9;
 para_sweep{3}.str = 'wl';
 para_sweep{3}.unit = '[m]';
-para_sweep{4}.values = linspace(300, 300, 1)*1e-9;
+para_sweep{4}.values = linspace(600, 600, 1)*1e-9;
 para_sweep{4}.str = 'wWG';
 para_sweep{4}.unit = '[m]';
 
@@ -55,7 +55,7 @@ for idx_param_list = 1:size(param_list.values,1)
         file_str = strrep(file_str,' ','_');
     if 1
         try
-            mphsave(comsol_model, ['./Results/' save_folder '/ComsolModels/' file_str '.mph']);
+            mphsave(comsol_model, [save_folder '/ComsolModels/' file_str '.mph']);
         catch
         end
     end
@@ -64,7 +64,7 @@ end
 
 %% Saving results as jason files -> move to seperate function!
 
-save(['./Results/' save_folder '\rawData.mat']);
+save([save_folder '\rawData.mat']);
 % adapt to also save sim_parameters and param_sweep
             writeToJson(param_list, sim_results, 'results_and_paramters')
 

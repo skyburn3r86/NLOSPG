@@ -27,16 +27,21 @@ function [model] = meshing(model, varargin)
     % reverse sweep direction to give high priority of meshing for later material
     for jj = length(materialNames):-1:1
         % checks if material properties are defined by txt file
+       
         if ~isempty(strfind(materials.(materialNames{jj}), '.txt'))
             % check if plasmonic waveguide 
-            if ~isempty(strfind(lower(materialNames{jj}), 'metal'))
+            if ~isempty(strfind(lower(materialNames{jj}), 'metalfine'))
                 meshsize = 'wl/plasmonic_mesh'; % plasmonic_mesh is defined in ModelSetup_Parameters
                 % reduce simulation time by utilzing scaling factors. For
                 % instance, hybrid waveguide with metal extending towards
                 % inifity for y --> yscale < 1 increases meshsize;
                 xscale = 1;
                 yscale = 1;
-            elseif ~isempty(strfind(lower(materialNames{jj}), 'electrodes'))
+            elseif ~isempty(strfind(lower(materialNames{jj}), 'electrodes')) || ~isempty(strfind(lower(materialNames{jj}), 'metalrough'))
+                meshsize = 'wl/10';                
+                xscale = 1;
+                yscale = 1;
+            elseif ~isempty(strfind(lower(materialNames{jj}), 'substrate')) || ~isempty(strfind(lower(materialNames{jj}), 'cladding'))
                 meshsize = 'wl/10';                
                 xscale = 1;
                 yscale = 1;

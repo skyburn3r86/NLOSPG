@@ -27,6 +27,9 @@ function results = calculateVaccumCoupling(model, varargin)
     type = 'Rf2IR';
     interactive_domain = 1; 
     error_flag = 0;
+    expression_field1 = 'ewfd.Ex';
+    expression_field2 = 'ewfd.Ex';
+    expression_field3 = 'es.Ex';
     
     %% scans through varagin. -1 and +1 of for loop due to option/value pairs
     for ii = 1:2:length(varargin)-1
@@ -42,7 +45,15 @@ function results = calculateVaccumCoupling(model, varargin)
             case 'OuterSolNums'
                 OuterSolNums = varargin{ii+1};
             case 'error_flag'
-                error_flag = varargin{ii+1};                
+                error_flag = varargin{ii+1};   
+            case 'error_flag'
+                error_flag = varargin{ii+1}; 
+            case 'expr_field1'
+                expr_field1 = varargin{ii+1};  
+            case 'expr_field2'
+                expr_field2 = varargin{ii+1};  
+            case 'expr_field3'
+                expr_field3 = varargin{ii+1};           
             otherwise
         end
     end
@@ -63,7 +74,7 @@ function results = calculateVaccumCoupling(model, varargin)
             % \sqrt(l_cavity) dependency. This is for the RF case included in
             % the capacitance.
             [dummy_RF] = mpheval(model,...
-                '(eps0*es.epsilonryy*wWG*lWG/hOEO)*V_bias^2/(hbar*2*pi*f_rf*2)',...
+                'es.epsilonryy*vaccum_norm_RF',...
                 'solnum', 1, 'dataset', 'dset1', 'selection', interactive_domain);
             normcoeff_RF.value = dummy_RF.d1(1);
             % the unit is 1/m
@@ -72,14 +83,14 @@ function results = calculateVaccumCoupling(model, varargin)
             % 2. extracts the nonlinear interaction. Note here es.Ey cannot be used
             % as it is part of a different dataset.
             [interaction_energy.value, interaction_energy.unit] = mphint2(model,...
-                '(omega/2*eps0*ewfd.nyy^4*ewfd.Ey*(ewfd.Ey)*es.Ey)*r33',...
+                ['(omega/2*eps0*ewfd.nxx^4*' expr_field1 '*' expr_field2 '*' expr_field3 ')*r33'],...
                 'surface', 'solnum', nr_solution, 'selection', interactive_domain);
             
             % 3. Calcualte the vaccum coupling which includes the 2-omega factor in our definition
             results(1).str = 'g_0';
             results(1).unit = '[2\pi Hz]';%[interaction_energy.unit{1} '/sqrt(' normcoeff_RF.unit{1} ')/' normcoeff_optical_energy.unit{1}];
             g_0 = interaction_energy.value/sqrt(normcoeff_optical_energy.value)^2/sqrt(normcoeff_RF.value);
-            results(1).value = g_0 ;
+            results(1).value = g_0;
             
             
             % extracting group refractive index via Sum(Energy)/Sum(PowerFlow) -
@@ -139,25 +150,32 @@ function results = calculateVaccumCoupling(model, varargin)
             % error during extraction renders simulation invalid --> NaN
             results(1).str = 'g_0';
             results(1).unit = '[2\pi Hz]';
-            results(1).value = NaN ;            
+            results(1).value = NaN ;  
+            last_colmn = size(results,2);          
             results(last_colmn+1).str = 'ng';
             results(last_colmn+1).unit = '[]';
-            results(last_colmn+1).value = NaN;            
+            results(last_colmn+1).value = NaN; 
+            last_colmn = size(results,2);           
             results(last_colmn+1).str = 'neff';
             results(last_colmn+1).unit = '[]';
-            results(last_colmn+1).value = NaN;            
+            results(last_colmn+1).value = NaN;    
+            last_colmn = size(results,2);        
             results(last_colmn+1).str = 'Q';
             results(last_colmn+1).unit = '[]';
-            results(last_colmn+1).value = NaN;            
+            results(last_colmn+1).value = NaN;  
+            last_colmn = size(results,2);          
             results(last_colmn+1).str = 'gamma';
             results(last_colmn+1).unit = '[2\pi x Hz]';
-            results(last_colmn+1).value = NaN;            
+            results(last_colmn+1).value = NaN;      
+            last_colmn = size(results,2);      
             results(last_colmn+1).str = 'L_prop_';
             results(last_colmn+1).unit = '[m]';
-            results(last_colmn+1).value = NaN;            
+            results(last_colmn+1).value = NaN;     
+            last_colmn = size(results,2);       
             results(last_colmn+1).str = 'C_reduced';
             results(last_colmn+1).unit = '[for \gamma_{RF} = 2\pi 1MHz]';
-            results(last_colmn+1).value = NaN;            
+            results(last_colmn+1).value = NaN;    
+            last_colmn = size(results,2);        
         end
 
     elseif strcmp(type, 'SPDC')
@@ -255,28 +273,36 @@ function results = calculateVaccumCoupling(model, varargin)
             % error during extraction renders simulation invalid --> NaN
             results(1).str = 'g_0';
             results(1).unit = '[2\pi Hz]';
-            results(1).value = NaN ;            
+            results(1).value = NaN ;
+            last_colmn = size(results,2);            
             results(last_colmn+1).str = 'ng';
             results(last_colmn+1).unit = '[]';
-            results(last_colmn+1).value = [NaN, NaN];                                
+            results(last_colmn+1).value = [NaN, NaN];  
+            last_colmn = size(results,2);                              
             results(last_colmn+1).str = 'neff';
             results(last_colmn+1).unit = '[]';
-            results(last_colmn+1).value = [NaN, NaN];            
+            results(last_colmn+1).value = [NaN, NaN]; 
+            last_colmn = size(results,2);           
             results(last_colmn+1).str = 'Q';
             results(last_colmn+1).unit = '[]';
-            results(last_colmn+1).value = [NaN, NaN];            
+            results(last_colmn+1).value = [NaN, NaN]; 
+            last_colmn = size(results,2);           
             results(last_colmn+1).str = 'gamma';
             results(last_colmn+1).unit = '[2\pi x Hz]';
-            results(last_colmn+1).value = [NaN, NaN];            
+            results(last_colmn+1).value = [NaN, NaN];  
+            last_colmn = size(results,2);          
             results(last_colmn+1).str = 'L_prop_';
             results(last_colmn+1).unit = '[m]';
-            results(last_colmn+1).value = [NaN, NaN];            
+            results(last_colmn+1).value = [NaN, NaN]; 
+            last_colmn = size(results,2);           
             results(last_colmn+1).str = 'C_reduced';
             results(last_colmn+1).unit = '[for \gamma_{RF} = 2\pi 1MHz]';
             results(last_colmn+1).value = NaN; 
+            last_colmn = size(results,2);
             results(last_colmn+1).str = 'lc';
             results(last_colmn+1).unit = '[\\mum]';
-            results(last_colmn+1).value = NaN;           
+            results(last_colmn+1).value = NaN;    
+            last_colmn = size(results,2);       
         end
     elseif strcmp(type, 'QED')
         

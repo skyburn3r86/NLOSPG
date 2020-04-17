@@ -11,7 +11,7 @@
 % list (defined by the rows of parameters_list_values.
 % No interpolation possible!!!
 
-function plotResultList(sim_results, para_list, varargin) 
+function [error_prompt list_vector]= plotResultList(sim_results, para_list, varargin) 
 
 %% input parameters:
 % result_List = Matrix (row = nr of simultion, column Y- result y)
@@ -31,6 +31,12 @@ function plotResultList(sim_results, para_list, varargin)
 if round(length(varargin)/2)~=length(varargin)/2
     error('Arguments needs propertyName/propertyValue pairs')
 end
+% defeault values
+ paper_size = [5 5 6 5.5];
+ error_prompt = [];
+ legend_flag = 0;
+
+
 % scans through varagin for wavelength. -1 and +1 of for loop due to
 % option/value pairs
 for list_loop = 1:2:length(varargin)-1
@@ -78,6 +84,15 @@ for list_loop = 1:2:length(varargin)-1
                 end
             case 'save'
                 save_path = varargin{list_loop+1};
+            case 'legend_flag'
+                legend_flag = varargin{list_loop+1};
+            case 'position'
+                if isnumeric(varargin{list_loop+1})
+                    paper_size = varargin{list_loop+1};
+                else
+                    error_prompt = ('position needs to be defined by an array of type [posx, posy, width, height] given in centimeters');
+                    return
+                end
         end
     end
 end
@@ -96,6 +111,7 @@ for idx_parameter = 1:length(para)
             end
         end
     end
+    % contains the row number for the specified parameter set
     list_vector = list_vector & row_vector;
     % error handling
     if sum(row_vector) == 0
@@ -153,17 +169,19 @@ clear counter;
         dataZ(idx_para2,idx_para1) = dummy_value;
         end
  end
-% 1D plot if second argument has less then 5 values
-if length(para{2}) < 5
-        dataX = para{1}.values;
-        dataY = dataZ;
-        % labeling corresponding to the secon d parameter
+ 
+ % 1D plot if second argument has less then 5 values
+ if length(para{2}) < 5
+     dataX = para{1}.values;
+     dataY = dataZ;
+     % labeling corresponding to the secon d parameter
         label_str = {};
         for jj = 1:length(para{2}.values)
                 label_str{jj} = strrep([ para{2}.str '_' num2str(para{2}.values(jj)) '' para{2}.unit],'_',' ');
         end                
         save_str = [strrep([ str_data ' ' str_unit],'_',' ')];
         save_str = [strrep([ str_data ' ' str_unit],'\',' ')];
+        title_str = save_str;
         for jj = 3:length(para)
             if length(para{jj}.values) > 1
                 save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) '-' num2str(max(para{jj}.values)) ']'];
@@ -172,37 +190,43 @@ if length(para{2}) < 5
             end
         end
         
-        % generating 1D plot
-        figure('Name', str_data);       
+        % generating 1D plot       
+        figure('Name', str_data, 'Units', 'centimeters', 'Position', paper_size);
         colors_marker = winter(size(dataY,1)+1);        
         fontsize =9;
         markersize =8;
         linewidth = 1.25;
         colors = lines(2);
         for jj = 1:size(dataY,1)
-            plot(dataX, dataY(jj,:)...
+            plot(dataX, abs(dataY(jj,:))...
                 , 'x--', 'MarkerSize',  markersize, 'Linewidth', linewidth, 'Color', colors_marker(jj,:))
             hold on
         end
         xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
         ylabel(strrep([ str_data ' ' str_unit],'_',' '));
-        title(save_str);
-        legend(label_str)        
+        title(title_str);
+        if legend_flag
+            legend(label_str); 
+        end
+        grid on;       
         if exist('save_path')
             save_str = [save_path strrep(save_str,'.','pt')];
-            saveas(gcf, [save_str '.jpeg']);
+            saveas(gcf, [save_str '.jpeg']); 
+            saveas(gcf, [save_str '.tiff']);
             saveas(gcf, [save_str '.fig']);
         end    
 % 2D plot        
 else
     dataX = para{1}.values;
     dataY = para{2}.values;
-    % generating 1D plot
+    % generating 1D plot   
+    figure('Name', str_data, 'Units', 'centimeters', 'Position', paper_size);
     figure
     surface(dataX, dataY, real(dataZ));
     colorbar;
     save_str = [strrep([ str_data ' ' str_unit],'_',' ')];
     save_str = [strrep([ str_data ' ' str_unit],'\',' ')];
+    title_str = save_str;
     for jj = 3:length(para)
         if length(para{jj}.values) > 1
             save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) '-' num2str(max(para{jj}.values)) ']'];
@@ -210,12 +234,13 @@ else
             save_str = [save_str '__' para{jj}.str '_[' num2str(min(para{jj}.values)) ']'];
         end
     end
-    title(save_str);
+    title(title_str);
     xlabel(strrep([ para_list.str{colm_in_para_list(1)} ' ' para_list.unit{colm_in_para_list(1)} ],'_',' '));
     ylabel(strrep([ para_list.str{colm_in_para_list(2)} ' ' para_list.unit{colm_in_para_list(2)} ],'_',' '));
     if exist('save_path')
         save_str = [save_path strrep(save_str,'.','pt')];
         saveas(gcf, [save_str '.jpeg']);  
+        saveas(gcf, [save_str '.tiff']); 
         saveas(gcf, [save_str '.fig']); 
     end
 end

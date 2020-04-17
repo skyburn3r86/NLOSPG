@@ -28,6 +28,7 @@ function save_path =  generateSavePath(para_sweep)
     % check if folder already exist. if true ask user if override should be
     % performed
     if strcmp(msg,'Directory already exists.')
+%         selpath = uigetdir('./Results','Folder already exist. Options: Redfine path or overwrite')
         prompt = {'Folder already exist. Options: Redfine path string, overwrite (if name is not changed) or cancel saving:'};
         title = 'File Path';
         dims = [1 length(save_path)+20];
@@ -37,5 +38,5 @@ function save_path =  generateSavePath(para_sweep)
     end
     % transforming cell to string
     save_path = string(save_path);
-    save_path = save_path{1};
+    save_path = ['./Results/' save_path{1}];
 end

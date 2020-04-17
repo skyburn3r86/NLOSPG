@@ -94,6 +94,7 @@ function saveSolutionSnapshot(model, varargin)
         xlabel('x index [um]');
         ylabel('y index [um]');
         title(strrep(title_str,'_', ' '));
-        saveas(gcf, [path_str  title_str '.jpeg']);  
+        [status, msg, msgID] = mkdir([path_str '/FieldProfiles/']);
+        saveas(gcf, [path_str '/FieldProfiles/'  title_str '.jpeg']);  
         close all
 end

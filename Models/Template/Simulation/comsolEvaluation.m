@@ -50,7 +50,8 @@ function [simulation_results, error_prompt]= comsolEvaluation(model, simulation_
             end
         end
         % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode
-        simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEOWG', 'nr_solution', nr_solutionTM(1));        
+        simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEOWG', 'nr_solution', nr_solutionTM(1),...
+            'expr_field1', 'ewfd.Ey', 'expr_field2', 'ewfd.Ey', 'expr_field3', 'es.Ey');        
         if isnan(simulation_results(1).value)
             error_prompt = 'Error in ComsolEvaluation/calculateVaccumCoupling while extracting solutions';
         end  
