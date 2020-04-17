@@ -35,7 +35,7 @@ function model = Geometry(model, varargin)
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'cladding'], 'Rectangle');
     geom_dummy.label('cladding');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hCladding/2+hOEO'});
+    geom_dummy.set('pos', {'0' 'hCladding/2+hHigh_k'});
     geom_dummy.set('size', {'wSim' 'hCladding'});    
     model.component('comp1').geom('geom1').feature('r_cladding').set('contributeto', materialNames(1));
           
@@ -43,24 +43,24 @@ function model = Geometry(model, varargin)
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'electrodes'], 'Rectangle');
     geom_dummy.label('electrodes');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hOEO/2'});
-    geom_dummy.set('size', {'wSim' 'hOEO'});    
+    geom_dummy.set('pos', {'0' 'hHigh_k/2'});
+    geom_dummy.set('size', {'wSim' 'hHigh_k'});    
     model.component('comp1').geom('geom1').feature('r_electrodes').set('contributeto', materialNames(2));
     
     % generating high_k embedded between electrodes 
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'high_k_layer'], 'Rectangle');
     geom_dummy.label('high_k_layer');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hOEO/2'});
-    geom_dummy.set('size', {'wElectrode' 'hOEO'});    
+    geom_dummy.set('pos', {'0' 'hHigh_k/2'});
+    geom_dummy.set('size', {'wElectrode' 'hHigh_k'});    
     model.component('comp1').geom('geom1').feature('r_high_k_layer').set('contributeto', materialNames(3));    
            
     % generating OEO filling slot 
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'OEO_slot'], 'Rectangle');
     geom_dummy.label('OEO_slot');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hOEO/2'});
-    geom_dummy.set('size', {'wOEO' 'hOEO'});    
+    geom_dummy.set('pos', {'0' 'hHigh_k/2'});
+    geom_dummy.set('size', {'wOEO' 'hHigh_k'});    
     model.component('comp1').geom('geom1').feature('r_OEO_slot').set('contributeto', materialNames(4));
     
     % generating bottom WG burried in SiO2
@@ -86,7 +86,7 @@ function model = Geometry(model, varargin)
 %     % type: 'solid' filled object, 'closed' last and first point are conected, 'open' only lines between defined points of vector 
 %     geom_dummy.set('type', 'solid'); 
 %     geom_dummy.set('x', '-wWG/2 wSim/2');
-%     geom_dummy.set('y', 'hOEO hOEO');
+%     geom_dummy.set('y', 'hHigh_k hHigh_k');
 %     model.component('comp1').geom('geom1').feature('poly_graphene_top').set('contributeto', materialNames(7));
 %     
     

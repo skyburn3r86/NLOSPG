@@ -48,7 +48,7 @@ function [model] = Physics(model, varargin)
     % bottom silicon 
     model.component('comp1').physics.create('es', 'Electrostatics', 'geom1');
     % define materials that are subject to ES simulations
-    material_scattering = {'High_k', 'OEOWG'};
+    material_scattering = {'High_k', 'OEOWG', 'Substrate', 'PhotonicWG'};
     selection = [];
     for jj = 1:length(material_scattering)
         object = mphgetselection(model.selection(['geom1_' material_scattering{jj} '_dom']));

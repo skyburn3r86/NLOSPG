@@ -27,7 +27,7 @@ para_sweep{5}.unit = '[m]';
 para_sweep{6}.values = linspace(2000, 3000, 2)*1e-9;
 para_sweep{6}.str = 'wElectrode';
 para_sweep{6}.unit = '[m]';
-para_sweep{6}.values = linspace(1350, 1650, 2)*1e-9;
+para_sweep{6}.values = linspace(1300, 1600, 2)*1e-9;
 para_sweep{6}.str = 'wl';
 para_sweep{6}.unit = '[m]';
 
