@@ -38,26 +38,22 @@ function [simulation_results, error_prompt]= comsolEvaluation(model, simulation_
     [neffTE, nr_solutionTE, neffTM, nr_solutionTM] = findGuidedModes(model,...
         'substrate', materials.Substrate,'deltaN_threshold', 0.01, 'polarization_threshold', 0.5);
     if isempty(nr_solutionTE)
-        error_prompt = 'Error in ComsolEvaluation/findGuidedModes no TM mode found';
+        error_prompt = 'Error in ComsolEvaluation/findGuidedModes no TE mode found';
         % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode
         simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEOWG', 'nr_solution', 1, 'error_flag', 1);
     else        
         % plotting and saving modes
         for jj = 1:length(nr_solutionTE(1))
             if ~isempty(nr_solutionTE)
-                saveSolutionSnapshot(model, 'expression', 'abs(ewfd.normE)', 'nr_solution', nr_solutionTE(jj),...
-                    'title', ['opt' title_str], 'path', save_folder);
-            end
-            if ~isempty(nr_solutionTE)
-                saveSolutionSnapshot(model, 'expression', 'abs(es.Ex)', 'nr_solution', nr_solutionTE(jj),...
-                    'title', ['RF' title_str], 'path', save_folder);
+                saveSolutionSnapshot(model, 'expression', 'abs(ewfd.Ez)', 'nr_solution', nr_solutionTE(jj),...
+                    'title', title_str, 'path', save_folder);
             end
         end
-        % Calculations on the desired mode(s) - in this example it is the fundamental TM Mode
-        simulation_results = calculateVaccumCoupling(model, 'active_material', 'OEOWG', 'nr_solution', nr_solutionTE(1),...
-            'expr_field1', 'ewfd.Ex', 'expr_field2', 'ewfd.Ex', 'expr_field3', 'es.Ex');        
+        % Calculations on the desired mode(s) 
+        simulation_results = calculateDragEffect(model, 'active_material', 'MetalRoughMesh_1', 'nr_solution', nr_solutionTE(1),...
+            'title', title_str, 'path', save_folder);        
         if isnan(simulation_results(1).value)
-            error_prompt = 'Error in ComsolEvaluation/calculateVaccumCoupling while extracting solutions';
+            error_prompt = 'Error in ComsolEvaluation/calculateDragEffect while extracting solutions';
         end  
     end
     if ~isempty(error_prompt)

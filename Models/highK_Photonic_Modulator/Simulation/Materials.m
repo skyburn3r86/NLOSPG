@@ -2,6 +2,7 @@
 % Author:           Killian Keller
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
+% last adapted:     Christian HAffner 
     
 function [model] = Materials(model,varargin)
 %MATERIALS Creates the Materials for the Model.
@@ -9,52 +10,62 @@ function [model] = Materials(model,varargin)
     % Define Material Parameters
     materials = varargin{1};
     materialNames=fieldnames(materials);
+	global library_path 
     
-    % Define material properties for ElectroDynamics argument 
+    % Define material properties for ElectroDynamics argument
     for jj = 1:length(materialNames)
-        if ~isempty(strfind(materials.(materialNames{jj}), '.txt'))
-            if strcmp(materialNames{jj}, 'OEOWG')
-                % special case template for utilizing birefringent metals.
-                models.(['n_' materialNames{jj} '_eoAxis']) = ['real(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
-                models.(['k_' materialNames{jj} '_eoAxis']) = ['imag(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
-            end
-            models.(['n_' materialNames{jj}]) = ['real(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
-            models.(['k_' materialNames{jj}]) = ['imag(sqrt(eps' materialNames{jj} '_re(wl*1e9)+i*eps' materialNames{jj} '_im(wl*1e9)))'];
-        % model specific part
-        elseif ~isempty(strfind(materials.(materialNames{jj}), 'High_k'))
-            models.(['n_' materialNames{jj}]) = 'n_High_k';
-            models.(['k_' materialNames{jj}]) = '0';            
-        else
-            models.(['n_' materialNames{jj}]) = '1';
-            models.(['k_' materialNames{jj}]) = '0';
+        %         if ~isempty(strfind(materials.(materialNames{jj}), '.txt'))
+        material_forloop = materials.(materialNames{jj});
+        switch material_forloop(1:3)
+            case 'nk_' % optical properties
+                models.(['n_' materialNames{jj}]) = ['n' materialNames{jj} '(wl*1e9)'];
+                models.(['k_' materialNames{jj}]) = ['k' materialNames{jj} '(wl*1e9)'];
+                material_forloop = strrep(material_forloop,'nk_', 'eps_');
+            case 'ana'
+                % TO DO
+            otherwise
+                models.(['n_' materialNames{jj}]) = '0';
+                models.(['k_' materialNames{jj}]) = '1';
         end
-        
-        % @TODO: if case for n and k files or eps.... 
     end
-
+    
     for ii = 1:length(materialNames)
-        name = materialNames{ii};
-        if strcmp(name, 'OEOWG')
-            no = models.(['n_' name]);
-            ne = models.(['n_' name '_eoAxis']);
-        else            
-            no = models.(['n_' name]);
-            ne = no;
-        end
-            k = models.(['k_' name]);
-        model_dummy = model.component('comp1').material.create(['mat' name], 'Common');
-        model_dummy.propertyGroup.create('RefractiveIndex', 'Refractive index');
-        model_dummy.label(name);
-%         model_dummy.propertyGroup('RefractiveIndex').set('n', '');
-%         model_dummy.propertyGroup('RefractiveIndex').set('ki', '');
-        model_dummy.propertyGroup('RefractiveIndex').set('n', {ne '0' '0' '0' no' '0' '0' '0' no});
-        model_dummy.propertyGroup('RefractiveIndex').set('ki', {k '0' '0' '0' k '0' '0' '0' k});
-        objects = mphgetselection(model.selection(['geom1_' materialNames{ii} '_dom']));
-        model_dummy.selection.set(objects.entities);
-           
-        if ~isempty(strfind(lower(name),'high_k')) || ~isempty(strfind(lower(name),'oeo'))
-            model.component('comp1').material(['mat' name]).propertyGroup('def').set('relpermittivity', {['eps_' name]});
+        % set optical properties. 
+        if ~isempty(strfind(materials.(materialNames{ii}), '.txt'))
+            n = models.(['n_' materialNames{ii}]);
+            k = models.(['k_' materialNames{ii}]);
+            model_dummy = model.component('comp1').material.create(['mat' materialNames{ii}], 'Common');
+            model_dummy.propertyGroup.create('RefractiveIndex', 'Refractive index');
+            model_dummy.label(materialNames{ii});
+            model_dummy.propertyGroup('RefractiveIndex').set('n', {n '0' '0' '0' n' '0' '0' '0' n});
+            model_dummy.propertyGroup('RefractiveIndex').set('ki', {k '0' '0' '0' k '0' '0' '0' k});
+            objects = mphgetselection(model.selection(['geom1_' materialNames{ii} '_dom']));
+            model_dummy.selection.set(objects.entities);            
+            model.component('comp1').material(['mat' materialNames{ii}]).propertyGroup('def').set('relpermittivity', {['eps_' materialNames{ii}]});
+            
+            % checks if rf files have been initalized
+            material_forloop = materials.(materialNames{ii});
+            material_forloop = strrep(material_forloop,'nk','eps');
+            if 2 == exist([library_path '\DataIn\' material_forloop]) % 0 does not exist, 2 file exist
+                eps_str = ['eps' materialNames{ii} '_re(f_rf)+i*eps' materialNames{ii} '_im(f_rf)'];
+                model.component('comp1').material(['mat' materialNames{ii}]).propertyGroup('def').set('relpermittivity', {eps_str});
+            else
+                model.component('comp1').material(['mat' materialNames{ii}]).propertyGroup('def').set('relpermittivity', '1');
+            end
+            
+            % Adapt here material properties by the user given values
+            if ~isempty(strfind(lower(materialNames{ii}),'high_k')) % || ~isempty(strfind(lower(materialNames{ii}),'oeo'))
+                try
+                    % checks if parameter is defined. If not error message.
+                    model.param.get(['eps_' materialNames{ii}]);
+                    model.component('comp1').material(['mat' materialNames{ii}]).propertyGroup('def').set('relpermittivity', {['eps_' materialNames{ii}]});
+                catch
+                    error_prompt = ['Error in ComsolEvaluation/Materials parameter eps_' materialNames{ii} ' is not defined. Add Parameter or remove if case'];
+                    error(error_prompt);
+                end
+            end
         end
     end
 end
+
 

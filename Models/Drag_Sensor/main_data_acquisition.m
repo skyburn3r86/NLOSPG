@@ -9,28 +9,15 @@ initPaths(modelpath);
 
 % Note, defaults value are set in ModelSetup_Parameters
 % Sweep parameters. String has to match parameter name of the comsol model 
-para_sweep{1}.values = linspace(20, 300, 12)*1e-9;
-para_sweep{1}.str = 'wOEO';
+para_sweep{1}.values = linspace(10, 300, 16)*1e-9;
+para_sweep{1}.str = 'wSlot';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(60, 220, 4)*1e-9;
-para_sweep{2}.str = 'hHigh_k';
+para_sweep{2}.values = linspace(20, 200, 7)*1e-9;
+para_sweep{2}.str = 'hMetal';
 para_sweep{2}.unit = '[m]';
-para_sweep{3}.values = [1 10 100 1000];
-para_sweep{3}.str = 'eps_High_k';
-para_sweep{3}.unit = '';
-para_sweep{4}.values = linspace(100, 300, 3)*1e-9;
-para_sweep{4}.str = 'hWG';
-para_sweep{4}.unit = '[m]';
-para_sweep{5}.values = linspace(400, 800, 3)*1e-9;
-para_sweep{5}.str = 'wWG';
-para_sweep{5}.unit = '[m]';
-para_sweep{6}.values = linspace(2000, 3000, 2)*1e-9;
-para_sweep{6}.str = 'wElectrode';
-para_sweep{6}.unit = '[m]';
-para_sweep{6}.values = linspace(1300, 1600, 2)*1e-9;
-para_sweep{6}.str = 'wl';
-para_sweep{6}.unit = '[m]';
-
+para_sweep{3}.values = linspace(1300, 1600, 2)*1e-9;
+para_sweep{3}.str = 'wl';
+para_sweep{3}.unit = '[m]';
 
 % maping N-dimensional parameter sweep onto linear list
 [param_list] = combParameterSweep(para_sweep);
@@ -69,12 +56,12 @@ for idx_param_list = 1:size(param_list.values,1)
         catch
         end
     end
-    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', file_str, 'path', save_folder);   
+    sim_results{idx_param_list,1} = comsolEvaluation(comsol_model, sim_parameters, materials, 'title', file_str, 'path', [save_folder]);   
 end
 
 %% Saving results as jason files -> move to seperate function!
 
-save([save_folder '\rawData.mat']);
+save(['./Results/' save_folder '\rawData.mat']);
 % adapt to also save sim_parameters and param_sweep
             writeToJson(param_list, sim_results, 'results_and_paramters')
 

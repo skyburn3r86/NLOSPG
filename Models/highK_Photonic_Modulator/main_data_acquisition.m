@@ -9,13 +9,13 @@ initPaths(modelpath);
 
 % Note, defaults value are set in ModelSetup_Parameters
 % Sweep parameters. String has to match parameter name of the comsol model 
-para_sweep{1}.values = linspace(30, 300, 8)*1e-9;
+para_sweep{1}.values = linspace(20, 300, 12)*1e-9;
 para_sweep{1}.str = 'wOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(50, 200, 4)*1e-9;
-para_sweep{2}.str = 'hOEO';
+para_sweep{2}.values = linspace(60, 220, 4)*1e-9;
+para_sweep{2}.str = 'hHigh_k';
 para_sweep{2}.unit = '[m]';
-para_sweep{3}.values = [5 50 500];
+para_sweep{3}.values = [1 10 100 1000];
 para_sweep{3}.str = 'eps_High_k';
 para_sweep{3}.unit = '';
 para_sweep{4}.values = linspace(100, 300, 3)*1e-9;
@@ -26,6 +26,9 @@ para_sweep{5}.str = 'wWG';
 para_sweep{5}.unit = '[m]';
 para_sweep{6}.values = linspace(2000, 3000, 2)*1e-9;
 para_sweep{6}.str = 'wElectrode';
+para_sweep{6}.unit = '[m]';
+para_sweep{6}.values = linspace(1350, 1650, 2)*1e-9;
+para_sweep{6}.str = 'wl';
 para_sweep{6}.unit = '[m]';
 
 

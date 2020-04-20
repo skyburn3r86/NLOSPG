@@ -25,9 +25,9 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
         'hWG', {160, '[nm]'},...
         'wWG', {300, '[nm]'},...
         'lWG', {1e-6, '[m]'},...
-        'hOrganic', {200, '[nm]'},...
+        'hOrganic', {300, '[nm]'},...
         'hBuffer', {200, '[nm]'},...
-        'hOEO', {50, '[nm]'},...
+        'hHigh_k', {50, '[nm]'},...
         'wOEO', {50, '[nm]'},...
         'eps_OEOWG',{5.6, ''},...
         'hCladding', {2000, '[nm]'},...
@@ -82,14 +82,14 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
     % Note: Plasmonic waveguides materials MUST BE initialized by Metal_xx... 
     %       Electrodes MUST be initialized by Electrodes_xx to enable automating meshing
 	materials = struct(...
-		'Substrate', 'eps_SiO2_Lemarchand_2013_250nm__2500nm.txt',...
-		'Electrodes', 'eps_Au_IEF_1604.txt',...
+		'Substrate', 'nk_SiO2_Lemarchand_2013_250nm__2500nm.txt',...
+		'Electrodes', 'nk_Au_IEF_1604.txt',...
         'High_k', 'High_k',...
-		'OEOWG', 'eps_HD_BB_OH_UniWashington.txt',...
-		'OEO', 'eps_HD_BB_OH_UniWashington.txt',...
-		'PhotonicWG', 'eps_Si_Green_2008.txt',... % eps_Si3N4_Luke_2015, eps_Si_Green_2008
-		'MetalFineMesh_1', 'eps_Au_IEF_1604.txt',...
-		'Graphene', ' ');
+		'OEOWG', 'nk_HD_BB_OH_UniWashington.txt',...
+		'OEO', 'nk_HD_BB_OH_UniWashington.txt',...
+		'PhotonicWG', 'nk_Si_Green_2008.txt',... % nk_Si3N4_Luke_2015, nk_Si_Green_2008
+		'MetalFineMesh_1', 'nk_Au_IEF_1604.txt',...
+		'Graphene', 'ana_Graphene');
     MaterialNames=fieldnames(materials);
 	
     % redefine model paramters handed over
@@ -150,30 +150,33 @@ function [model, materials, comsol_parameters] = ModelSetup_Parameters(param_lis
 	model.func('Graphene').set('plotargs', {'wl' '500' '2000'});
 	
 	
-	% II) Interpolation defined by files in DataIn folder. 3columns with 1st-wavelength, 2nd-real, 3rd-imag 	
+	
+	% II) Interpolation defined by files in DataIn folder. 3-columns with 1st-wavelength, 2nd-real, 3rd-imag 	
 	for ii = 1:length(MaterialNames)
         name = MaterialNames{ii};
         str_file = materials.(name); 
-        % TO DO NK
         if ~isempty(strfind(materials.(name), '.txt'))
-            if ~isempty(strfind(materials.(name), 'eps'))
-                % ture if material defined via epsilon
-                interpDummy = model.func.create(MaterialNames{ii}, 'Interpolation');
-                interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
-                interpDummy.set('source', 'file');
-                interpDummy.set('filename', [library_path '\DataIn\' str_file]);
-                interpDummy.set('extrap', 'linear');
-                interpDummy = [];
-            elseif ~isempty(strfind(materials.(name), 'nk'))
+            % first loading optical properties 
+            if ~isempty(strfind(materials.(name), 'nk'))
                 % true if material defined via nk
                 interpDummy = model.func.create(MaterialNames{ii}, 'Interpolation');
                 interpDummy.set('funcs', {['n' MaterialNames{ii}] '1'; ['k' MaterialNames{ii}] '2'});
                 interpDummy.set('source', 'file');
-                interpDummy.set('filename', [library_path '\DataIn\' str_file]);
+                interpDummy.set('filename', [library_path '\DataIn\' str_file]);      
+                interpDummy.set('struct', 'spreadsheet');
                 interpDummy.set('extrap', 'linear');
-                interpDummy = [];                
-            end
-            
+                interpDummy = [];    
+            % second loading rf properties
+            str_file = strrep(str_file,'nk_', 'eps_'); 
+            if 2 == exist([library_path '\DataIn\' str_file]) % 0 does not exist, 2 file exist
+                interpDummy = model.func.create([MaterialNames{ii} '_eps'], 'Interpolation');
+                interpDummy.set('funcs', {['eps' MaterialNames{ii} '_re'] '1'; ['eps' MaterialNames{ii} '_im'] '2'});
+                interpDummy.set('source', 'file');
+                interpDummy.set('filename', [library_path '\DataIn\' str_file]);                
+                interpDummy.set('struct', 'spreadsheet');
+                interpDummy.set('extrap', 'linear');
+                interpDummy = [];
+            end            
         end
     end
 end

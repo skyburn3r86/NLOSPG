@@ -35,60 +35,56 @@ function model = Geometry(model, varargin)
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'cladding'], 'Rectangle');
     geom_dummy.label('cladding');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hCladding/2+hHigh_k'});
-    geom_dummy.set('size', {'wSim' 'hCladding'});    
-    model.component('comp1').geom('geom1').feature('r_cladding').set('contributeto', materialNames(1));
-          
-    % generating electrodes 
-    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'electrodes'], 'Rectangle');
-    geom_dummy.label('electrodes');
-	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hHigh_k/2'});
-    geom_dummy.set('size', {'wSim' 'hHigh_k'});    
-    model.component('comp1').geom('geom1').feature('r_electrodes').set('contributeto', materialNames(2));
+    geom_dummy.set('pos', {'0' 'hcladding/2+hMetal/2+hOrganic/2'});
+    geom_dummy.set('size', {'wSim' 'hcladding+hMetal+hOrganic'});    
+    model.component('comp1').geom('geom1').feature('r_cladding').set('contributeto', materialNames(2));      
     
-    % generating high_k embedded between electrodes 
-    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'high_k_layer'], 'Rectangle');
-    geom_dummy.label('high_k_layer');
+    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'OEO_cladd'], 'Rectangle');
+    geom_dummy.label('OEO_cladd_left');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hHigh_k/2'});
-    geom_dummy.set('size', {'wElectrode' 'hHigh_k'});    
-    model.component('comp1').geom('geom1').feature('r_high_k_layer').set('contributeto', materialNames(3));    
-           
+    geom_dummy.set('pos', {'0' 'hOrganic/2'});
+    geom_dummy.set('size', {'wSim' 'hOrganic'});    
+    model.component('comp1').geom('geom1').feature('r_OEO_cladd').set('contributeto', materialNames(3));
+              
     % generating OEO filling slot 
     geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'OEO_slot'], 'Rectangle');
     geom_dummy.label('OEO_slot');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' 'hHigh_k/2'});
-    geom_dummy.set('size', {'wOEO' 'hHigh_k'});    
+    geom_dummy.set('pos', {'0' 'hMetal/2'});
+    geom_dummy.set('size', {'wSlot' 'hMetal'});    
     model.component('comp1').geom('geom1').feature('r_OEO_slot').set('contributeto', materialNames(4));
     
-    % generating bottom WG burried in SiO2
-    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'photonic_wg_bot'], 'Rectangle');
-    geom_dummy.label('photonic_wg_bot');
+%     % generating right Metal
+    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'metal_right'], 'Rectangle');
+    geom_dummy.label('metal_right');
 	geom_dummy.set('base','center');
-    geom_dummy.set('pos', {'0' '-hWG/2'});
-    geom_dummy.set('size', {'wWG' 'hWG'});    
-    model.component('comp1').geom('geom1').feature('r_photonic_wg_bot').set('contributeto', materialNames(6));
-%     
-%     % generating bottom graphene electrode entities via a Polygon
-%     geom_dummy = model.component('comp1').geom('geom1').create('poly_graphene_bot', 'Polygon');
-%     geom_dummy.set('source', 'vectors'); % points are defined via vactor 
-%     % type: 'solid' filled object, 'closed' last and first point are conected, 'open' only lines between defined points of vector 
-%     geom_dummy.set('type', 'solid'); 
-%     geom_dummy.set('x', '-wSim/2 wWG/2');
-%     geom_dummy.set('y', '0 0');
-%     model.component('comp1').geom('geom1').feature('poly_graphene_bot').set('contributeto',  materialNames(7));
-%     
-%     % generating top graphene electrode entities
-%     geom_dummy = model.component('comp1').geom('geom1').create('poly_graphene_top', 'Polygon');
-%     geom_dummy.set('source', 'vectors');
-%     % type: 'solid' filled object, 'closed' last and first point are conected, 'open' only lines between defined points of vector 
-%     geom_dummy.set('type', 'solid'); 
-%     geom_dummy.set('x', '-wWG/2 wSim/2');
-%     geom_dummy.set('y', 'hHigh_k hHigh_k');
-%     model.component('comp1').geom('geom1').feature('poly_graphene_top').set('contributeto', materialNames(7));
-%     
+    geom_dummy.set('pos', {'-wMetal/2-wSlot/2' 'hMetal/2'});
+    geom_dummy.set('size', {'wMetal' 'hMetal'});    
+    model.component('comp1').geom('geom1').feature('r_metal_right').set('contributeto', materialNames(5));
+    
+%     % generating right Metal skindepth section
+    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'metal_right_skin'], 'Rectangle');
+    geom_dummy.label('metal_right_skindepth');
+	geom_dummy.set('base','center');
+    geom_dummy.set('pos', {'-skindepthMetal/2-wSlot/2' 'hMetal/2'});
+    geom_dummy.set('size', {'skindepthMetal' 'hMetal'});    
+    model.component('comp1').geom('geom1').feature('r_metal_right_skin').set('contributeto', materialNames(6));
+
+    % generating left Metal 
+    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'metal_left'], 'Rectangle');
+    geom_dummy.label('metal_left');
+	geom_dummy.set('base','center');
+    geom_dummy.set('pos', {'wMetal/2+wSlot/2' 'hMetal/2'});
+    geom_dummy.set('size', {'wMetal' 'hMetal'});    
+    model.component('comp1').geom('geom1').feature('r_metal_left').set('contributeto', materialNames(5));
+        
+%     % generating right Metal skindepth section
+    geom_dummy = model.component('comp1').geom('geom1').create(['r_' 'metal_left_skin'], 'Rectangle');
+    geom_dummy.label('metal_left_skindepth');
+	geom_dummy.set('base','center');
+    geom_dummy.set('pos', {'skindepthMetal/2+wSlot/2' 'hMetal/2'});
+    geom_dummy.set('size', {'skindepthMetal' 'hMetal'});    
+    model.component('comp1').geom('geom1').feature('r_metal_left_skin').set('contributeto', materialNames(6));
     
     % generating geometry
     model.component('comp1').geom('geom1').run;
