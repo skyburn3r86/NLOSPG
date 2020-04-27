@@ -2,6 +2,7 @@
 % Author:           Killian Keller
 % E-Mail:           killian.keller@ief.ee.ethz.ch
 % Organization:     ETHZ ITET IEF
+% last adapted:     Christian HAffner 
     
 function [model] = Materials(model,varargin)
 %MATERIALS Creates the Materials for the Model.
@@ -22,15 +23,21 @@ function [model] = Materials(model,varargin)
                 material_forloop = strrep(material_forloop,'nk_', 'eps_');
             case 'ana'
                 % TO DO
+                    models.(['n_' materialNames{jj}]) = '1';
+                    models.(['k_' materialNames{jj}]) = '0';
             otherwise
-                models.(['n_' materialNames{jj}]) = '0';
-                models.(['k_' materialNames{jj}]) = '1';
+                try
+                    models.(['n_' materialNames{jj}]) = ['n_' materialNames{jj}];
+                    models.(['k_' materialNames{jj}]) = '0';
+                catch
+                    models.(['n_' materialNames{jj}]) = '1';
+                    models.(['k_' materialNames{jj}]) = '0';
+                end
         end
     end
     
     for ii = 1:length(materialNames)
         % set optical properties. 
-        if ~isempty(strfind(materials.(materialNames{ii}), '.txt'))
             n = models.(['n_' materialNames{ii}]);
             k = models.(['k_' materialNames{ii}]);
             model_dummy = model.component('comp1').material.create(['mat' materialNames{ii}], 'Common');
@@ -44,9 +51,12 @@ function [model] = Materials(model,varargin)
             
             % checks if rf files have been initalized
             material_forloop = materials.(materialNames{ii});
+            material_forloop = strrep(material_forloop,'nk','eps');
             if 2 == exist([library_path '\DataIn\' material_forloop]) % 0 does not exist, 2 file exist
                 eps_str = ['eps' materialNames{ii} '_re(f_rf)+i*eps' materialNames{ii} '_im(f_rf)'];
                 model.component('comp1').material(['mat' materialNames{ii}]).propertyGroup('def').set('relpermittivity', {eps_str});
+            else
+                model.component('comp1').material(['mat' materialNames{ii}]).propertyGroup('def').set('relpermittivity', '1');
             end
             
             % Adapt here material properties by the user given values
@@ -60,7 +70,6 @@ function [model] = Materials(model,varargin)
                     error(error_prompt);
                 end
             end
-        end
     end
 end
 

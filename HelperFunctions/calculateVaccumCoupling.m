@@ -27,9 +27,9 @@ function results = calculateVaccumCoupling(model, varargin)
     type = 'Rf2IR';
     interactive_domain = 1; 
     error_flag = 0;
-    expression_field1 = 'ewfd.Ex';
-    expression_field2 = 'ewfd.Ex';
-    expression_field3 = 'es.Ex';
+    expr_field1 = 'ewfd.Ex';
+    expr_field2 = 'ewfd.Ex';
+    expr_field3 = 'es.Ex';
     
     %% scans through varagin. -1 and +1 of for loop due to option/value pairs
     for ii = 1:2:length(varargin)-1
@@ -73,12 +73,20 @@ function results = calculateVaccumCoupling(model, varargin)
             % be normalized at various frequencyies. Resulting in an
             % \sqrt(l_cavity) dependency. This is for the RF case included in
             % the capacitance.
-            [dummy_RF] = mpheval(model,...
-                'es.epsilonryy*vaccum_norm_RF',...
+            [C_dummy] = mpheval(model,...
+                'es.epsilonryy*vaccum_capacitance',...
                 'solnum', 1, 'dataset', 'dset1', 'selection', interactive_domain);
-            normcoeff_RF.value = dummy_RF.d1(1);
+            C_cavity_analytic.value = C_dummy.d1(1);
             % the unit is 1/m
-            normcoeff_RF.unit = [dummy_RF.unit];
+            C_cavity_analytic.unit = ['[' C_dummy.unit ']'];
+            [C_cavity_numerical.value] = mphglobal(model,...
+                'es.intWe*2/V_bias^2*lWG', 'solnum', 1, 'dataset', 'dset1');
+            [C_cavity_numerical.unit] = '[F]';
+            
+            normcoeff_RF.value = mphglobal(model,...
+                'es.intWe*lWG/(hbar*2*pi*f_rf)', 'solnum', 1, 'dataset', 'dset1');
+            % the unit is 1/m
+            normcoeff_RF.unit = '';
             
             % 2. extracts the nonlinear interaction. Note here es.Ey cannot be used
             % as it is part of a different dataset.
@@ -135,6 +143,16 @@ function results = calculateVaccumCoupling(model, varargin)
             results(last_colmn+1).str = 'L_prop_';
             results(last_colmn+1).unit = '[m]';
             results(last_colmn+1).value = mphglobal(model, '1/(2*imag(ewfd.neff)*2*pi/wl)', 'dataset', 'dset1', 'outersolnum', 1, 'solnum', nr_solution);
+                        
+            last_colmn = size(results,2);
+            results(last_colmn+1).str = 'Capacitance_analytical';
+            results(last_colmn+1).unit = C_cavity_analytic.unit;
+            results(last_colmn+1).value = C_cavity_analytic.value;
+            
+            last_colmn = size(results,2);
+            results(last_colmn+1).str = 'Capacitance_numerical';
+            results(last_colmn+1).unit = C_cavity_numerical.unit;
+            results(last_colmn+1).value = C_cavity_numerical.value;                     
             
             last_colmn = size(results,2);
             C = 4.*g_0^2/gamma/(2*pi*1e6);
@@ -170,7 +188,15 @@ function results = calculateVaccumCoupling(model, varargin)
             last_colmn = size(results,2);      
             results(last_colmn+1).str = 'L_prop_';
             results(last_colmn+1).unit = '[m]';
-            results(last_colmn+1).value = NaN;     
+            results(last_colmn+1).value = NaN;                
+            last_colmn = size(results,2);
+            results(last_colmn+1).str = 'Capacitance_analytical';
+            results(last_colmn+1).unit = '[F]';
+            results(last_colmn+1).value = NaN;            
+            last_colmn = size(results,2);
+            results(last_colmn+1).str = 'Capacitance_numerical';
+            results(last_colmn+1).unit = '[F]';
+            results(last_colmn+1).value = NaN;    
             last_colmn = size(results,2);       
             results(last_colmn+1).str = 'C_reduced';
             results(last_colmn+1).unit = '[for \gamma_{RF} = 2\pi 1MHz]';

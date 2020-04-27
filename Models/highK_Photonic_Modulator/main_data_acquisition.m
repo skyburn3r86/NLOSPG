@@ -1,5 +1,5 @@
 clear all
-close all
+% close all
 
 modelpath = pwd;
 % path for global variabls, paths, material data, etc
@@ -12,24 +12,24 @@ initPaths(modelpath);
 para_sweep{1}.values = linspace(20, 300, 12)*1e-9;
 para_sweep{1}.str = 'wOEO';
 para_sweep{1}.unit = '[m]';
-para_sweep{2}.values = linspace(60, 220, 4)*1e-9;
+para_sweep{2}.values = linspace(60, 220, 5)*1e-9;
 para_sweep{2}.str = 'hHigh_k';
 para_sweep{2}.unit = '[m]';
 para_sweep{3}.values = [1 10 100 1000];
 para_sweep{3}.str = 'eps_High_k';
 para_sweep{3}.unit = '';
-para_sweep{4}.values = linspace(100, 300, 3)*1e-9;
+para_sweep{4}.values = linspace(100, 200, 3)*1e-9;
 para_sweep{4}.str = 'hWG';
 para_sweep{4}.unit = '[m]';
-para_sweep{5}.values = linspace(400, 800, 3)*1e-9;
+para_sweep{5}.values = linspace(400, 800, 2)*1e-9;
 para_sweep{5}.str = 'wWG';
 para_sweep{5}.unit = '[m]';
 para_sweep{6}.values = linspace(2000, 3000, 2)*1e-9;
 para_sweep{6}.str = 'wElectrode';
 para_sweep{6}.unit = '[m]';
-para_sweep{6}.values = linspace(1350, 1650, 2)*1e-9;
-para_sweep{6}.str = 'wl';
-para_sweep{6}.unit = '[m]';
+para_sweep{7}.values = linspace(1350, 1650, 2)*1e-9;
+para_sweep{7}.str = 'wl';
+para_sweep{7}.unit = '[m]';
 
 
 % maping N-dimensional parameter sweep onto linear list

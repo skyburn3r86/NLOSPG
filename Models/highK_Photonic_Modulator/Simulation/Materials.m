@@ -23,15 +23,21 @@ function [model] = Materials(model,varargin)
                 material_forloop = strrep(material_forloop,'nk_', 'eps_');
             case 'ana'
                 % TO DO
+                    models.(['n_' materialNames{jj}]) = '1';
+                    models.(['k_' materialNames{jj}]) = '0';
             otherwise
-                models.(['n_' materialNames{jj}]) = '0';
-                models.(['k_' materialNames{jj}]) = '1';
+                try
+                    models.(['n_' materialNames{jj}]) = ['n_' materialNames{jj}];
+                    models.(['k_' materialNames{jj}]) = '0';
+                catch
+                    models.(['n_' materialNames{jj}]) = '1';
+                    models.(['k_' materialNames{jj}]) = '0';
+                end
         end
     end
     
     for ii = 1:length(materialNames)
         % set optical properties. 
-        if ~isempty(strfind(materials.(materialNames{ii}), '.txt'))
             n = models.(['n_' materialNames{ii}]);
             k = models.(['k_' materialNames{ii}]);
             model_dummy = model.component('comp1').material.create(['mat' materialNames{ii}], 'Common');
@@ -64,7 +70,6 @@ function [model] = Materials(model,varargin)
                     error(error_prompt);
                 end
             end
-        end
     end
 end
 
